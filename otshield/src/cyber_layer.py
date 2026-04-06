@@ -1,24 +1,11 @@
-"""OTShield Cyber Layer -- anomaly detection inference (supervised)."""
+"""OTShield Cyber Layer -- network traffic anomaly detection (TON_IoT RF model)."""
 
-from supervised_scorer import get_supervised_score, SENSOR_COLS
-
-# Re-export for backward compatibility
-FEATURE_NAMES = SENSOR_COLS
+from cyber_scorer import get_cyber_score
 
 
-def get_cyber_score(sensor_dict):
+def get_cyber_layer_score(network_dict):
     """
-    Input:  sensor_dict with BATADAL sensor keys
+    Input:  network_dict with TON_IoT flow keys
     Output: (score: float 0-100, explanation: str, top_feature: str)
     """
-    score, explanation, top_feature = get_supervised_score(sensor_dict)
-
-    # Cyber-specific explanation text
-    if score > 70:
-        explanation = "High anomaly detected in sensor pattern"
-    elif score > 40:
-        explanation = "Moderate anomaly detected"
-    else:
-        explanation = "Normal behavior"
-
-    return score, explanation, top_feature
+    return get_cyber_score(network_dict)

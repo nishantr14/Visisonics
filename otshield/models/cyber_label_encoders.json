@@ -1,0 +1,33 @@
+{
+  "proto": [
+    "icmp",
+    "tcp",
+    "udp"
+  ],
+  "service": [
+    "dce_rpc",
+    "dns",
+    "ftp",
+    "gssapi",
+    "http",
+    "none",
+    "smb",
+    "smb;gssapi",
+    "ssl"
+  ],
+  "conn_state": [
+    "OTH",
+    "REJ",
+    "RSTO",
+    "RSTOS0",
+    "RSTR",
+    "RSTRH",
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "SF",
+    "SH",
+    "SHR"
+  ]
+}
