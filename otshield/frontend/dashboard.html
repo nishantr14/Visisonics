@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OTShield — Live Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root {
@@ -24,8 +27,20 @@
       --yellow: #FFB800;
     }
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; }
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       background: var(--dark);
       color: #fff;
@@ -34,427 +49,672 @@
 
     /* ─── NAVBAR ─── */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 14px 48px;
-      background: linear-gradient(to bottom, rgba(4,6,8,0.95), rgba(4,6,8,0.85));
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(to bottom, rgba(4, 6, 8, 0.95), rgba(4, 6, 8, 0.85));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .nav-logo {
-      font-family: var(--cond); font-size: 22px; font-weight: 900;
-      letter-spacing: 3px; color: #fff; text-transform: uppercase;
+      font-family: var(--cond);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #fff;
+      text-transform: uppercase;
     }
-    .nav-logo span { color: var(--red-bright); }
+
+    .nav-logo span {
+      color: var(--red-bright);
+    }
+
     .nav-center {
-      display: flex; align-items: center; gap: 10px;
-      font-family: var(--mono); font-size: 11px;
-      letter-spacing: 2px; text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
+
     .autopilot-badge {
-      display: flex; align-items: center; gap: 8px; margin-right: 24px;
-      background: rgba(0,204,136,0.1); border: 1px solid #00CC88;
-      padding: 6px 14px; border-radius: 2px; color: #00CC88;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 24px;
+      background: rgba(0, 204, 136, 0.1);
+      border: 1px solid #00CC88;
+      padding: 6px 14px;
+      border-radius: 2px;
+      color: #00CC88;
     }
+
     .status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green); display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
     }
-    .status-dot.disconnected { background: var(--yellow); animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .nav-links { display: flex; gap: 36px; list-style: none; }
+
+    .status-dot.disconnected {
+      background: var(--yellow);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
     .nav-links a {
-      font-family: var(--mono); font-size: 11px; color: var(--steel);
-      text-decoration: none; letter-spacing: 2px; text-transform: uppercase;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--steel);
+      text-decoration: none;
+      letter-spacing: 2px;
+      text-transform: uppercase;
       transition: color 0.2s;
     }
-    .nav-links a:hover { color: #fff; }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
 
     /* ─── MAIN LAYOUT ─── */
     .dashboard {
-      margin-top: 56px; padding: 16px 32px 12px;
-      display: grid; gap: 12px; height: calc(100vh - 56px);
+      margin-top: 56px;
+      padding: 16px 32px 12px;
+      display: grid;
+      gap: 12px;
+      height: calc(100vh - 56px);
       grid-template-rows: auto 1fr auto auto;
     }
 
     /* ─── SCORE CARDS ─── */
     .score-row {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
+
     .score-card {
-      background: var(--dark-2); border: 1px solid rgba(255,255,255,0.08);
-      padding: 16px 20px; position: relative; overflow: hidden;
+      background: var(--dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 20px;
+      position: relative;
+      overflow: hidden;
     }
+
     .score-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 2px;
     }
-    .score-card.cyber::before { background: var(--blue-bright); }
-    .score-card.physical::before { background: var(--green); }
-    .score-card.audio::before { background: var(--purple); }
-    .score-card.visual::before { background: var(--yellow); }
-    .score-card.fusion::before { background: var(--steel); }
+
+    .score-card.cyber::before {
+      background: var(--blue-bright);
+    }
+
+    .score-card.physical::before {
+      background: var(--green);
+    }
+
+    .score-card.audio::before {
+      background: var(--purple);
+    }
+
+    .score-card.visual::before {
+      background: var(--yellow);
+    }
+
+    .score-card.fusion::before {
+      background: var(--steel);
+    }
 
     .score-label {
-      font-family: var(--mono); font-size: 10px; color: var(--steel);
-      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
+
     .score-value {
-      font-family: var(--cond); font-size: 36px; font-weight: 900;
+      font-family: var(--cond);
+      font-size: 36px;
+      font-weight: 900;
     }
+
     .score-sub {
-      font-family: var(--mono); font-size: 10px; color: var(--steel);
-      letter-spacing: 1px; margin-top: 2px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 1px;
+      margin-top: 2px;
     }
 
     /* ─── CHART ─── */
     .chart-container {
-      background: var(--dark-2); border: 1px solid rgba(255,255,255,0.08);
-      padding: 12px 16px; min-height: 0;
+      background: var(--dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 16px;
+      min-height: 0;
     }
-    .chart-container canvas { width: 100% !important; height: 100% !important; }
+
+    .chart-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
 
     /* ─── BOTTOM PANELS ─── */
     .bottom-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
+
     .panel {
-      background: var(--dark-2); border: 1px solid rgba(255,255,255,0.08);
+      background: var(--dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       padding: 14px 18px;
     }
+
     .panel-title {
-      font-family: var(--mono); font-size: 10px; color: var(--steel);
-      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
     }
 
     /* SHAP bars */
-    .shap-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .shap-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
     .shap-label {
-      font-family: var(--mono); font-size: 10px; color: var(--steel);
-      letter-spacing: 1px; min-width: 60px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 1px;
+      min-width: 60px;
     }
+
     .shap-bar-bg {
-      flex: 1; height: 6px; background: rgba(255,255,255,0.06); position: relative;
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
     }
+
     .shap-bar-fill {
-      position: absolute; left: 0; top: 0; bottom: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
       transition: width 0.5s ease;
     }
+
     .shap-pct {
-      font-family: var(--mono); font-size: 11px; color: #fff;
-      min-width: 40px; text-align: right;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #fff;
+      min-width: 40px;
+      text-align: right;
     }
+
     .shap-detail {
-      font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,0.4);
-      margin-top: -6px; margin-bottom: 10px; padding-left: 72px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: -6px;
+      margin-bottom: 10px;
+      padding-left: 72px;
     }
+
     .shap-action {
-      margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      font-size: 12px; color: var(--steel); letter-spacing: 1px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      color: var(--steel);
+      letter-spacing: 1px;
     }
-    .shap-action strong { color: #fff; }
+
+    .shap-action strong {
+      color: #fff;
+    }
 
     /* Alert log */
     .alert-log {
-      max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;
+      max-height: 160px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .alert-log::-webkit-scrollbar { width: 4px; }
-    .alert-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    .alert-log::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .alert-log::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+    }
+
     .alert-entry {
-      font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-      padding: 6px 10px; background: rgba(255,255,255,0.03);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
       border-left: 2px solid var(--steel);
     }
-    .alert-entry.SAFE { border-color: var(--green); color: var(--green); }
-    .alert-entry.WARNING { border-color: var(--yellow); color: var(--yellow); }
-    .alert-entry.CYBER { border-color: var(--blue-bright); color: var(--blue-bright); }
-    .alert-entry.PHYSICAL { border-color: var(--purple); color: var(--purple); }
-    .alert-entry.CRITICAL { border-color: var(--red-bright); color: var(--red-bright); }
+
+    .alert-entry.SAFE {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .alert-entry.WARNING {
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    .alert-entry.CYBER {
+      border-color: var(--blue-bright);
+      color: var(--blue-bright);
+    }
+
+    .alert-entry.PHYSICAL {
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    .alert-entry.CRITICAL {
+      border-color: var(--red-bright);
+      color: var(--red-bright);
+    }
 
     /* ─── SCENARIO BUTTONS ─── */
     .scenario-row {
-      display: flex; gap: 12px; justify-content: center; padding: 4px 0;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding: 4px 0;
     }
+
     .scenario-btn {
-      font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--steel); background: transparent;
-      border: 1px solid var(--steel); padding: 10px 28px; cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--steel);
+      background: transparent;
+      border: 1px solid var(--steel);
+      padding: 10px 28px;
+      cursor: pointer;
       transition: all 0.2s;
     }
-    .scenario-btn:hover { color: #fff; }
-    .scenario-btn.cyber-btn { border-color: var(--blue-bright); color: var(--blue-bright); }
-    .scenario-btn.cyber-btn:hover { background: rgba(77,159,255,0.1); }
-    .scenario-btn.physical-btn { border-color: var(--green); color: var(--green); }
-    .scenario-btn.physical-btn:hover { background: rgba(0,204,136,0.1); }
+
+    .scenario-btn:hover {
+      color: #fff;
+    }
+
+    .scenario-btn.cyber-btn {
+      border-color: var(--blue-bright);
+      color: var(--blue-bright);
+    }
+
+    .scenario-btn.cyber-btn:hover {
+      background: rgba(77, 159, 255, 0.1);
+    }
+
+    .scenario-btn.physical-btn {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .scenario-btn.physical-btn:hover {
+      background: rgba(0, 204, 136, 0.1);
+    }
+
     .scenario-btn.critical-btn {
-      border-color: var(--red-bright); color: #fff;
+      border-color: var(--red-bright);
+      color: #fff;
       background: var(--red);
       animation: pulse-red 2s infinite;
     }
-    .scenario-btn.critical-btn:hover { background: var(--red-bright); }
-    .scenario-btn.active { outline: 2px solid #fff; outline-offset: 2px; }
+
+    .scenario-btn.critical-btn:hover {
+      background: var(--red-bright);
+    }
+
+    .scenario-btn.active {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
 
     @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 5px rgba(255,26,26,0.5); }
-      50% { box-shadow: 0 0 25px rgba(255,26,26,0.9); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 5px rgba(255, 26, 26, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 25px rgba(255, 26, 26, 0.9);
+      }
     }
 
     /* ─── TOAST NOTIFICATION ─── */
     #toast {
-      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-      background: rgba(255, 26, 26, 0.9); color: #fff;
-      padding: 12px 24px; border-radius: 4px;
-      font-family: var(--mono); font-size: 14px; font-weight: bold;
-      letter-spacing: 2px; text-transform: uppercase;
-      opacity: 0; transition: opacity 0.3s, top 0.3s; z-index: 9999;
-      pointer-events: none; border: 1px solid rgba(255,255,255,0.2);
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 26, 26, 0.9);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.3s, top 0.3s;
+      z-index: 9999;
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    #toast.show { opacity: 1; top: 80px; }
+
+    #toast.show {
+      opacity: 1;
+      top: 80px;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- TOAST -->
-<div id="toast">SYSTEM NORMALIZED</div>
+  <!-- TOAST -->
+  <div id="toast">SYSTEM NORMALIZED</div>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">OT<span>Shield</span></div>
-  <div class="nav-center">
-    <div class="autopilot-badge">
-      <span class="status-dot"></span> AUTOPILOT DEFENSE: ON
-    </div>
-    <span class="status-dot" id="statusDot"></span>
-    <span id="statusText">CONNECTED</span>
-  </div>
-  <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
-  </ul>
-</nav>
-
-<!-- DASHBOARD -->
-<div class="dashboard">
-
-  <!-- SCORE CARDS -->
-  <div class="score-row">
-    <div class="score-card cyber">
-      <div class="score-label">Cyber</div>
-      <div class="score-value" id="cyberScore">N/A</div>
-      <div class="score-sub">Network layer</div>
-    </div>
-    <div class="score-card physical">
-      <div class="score-label">Physical</div>
-      <div class="score-value" id="physicalScore">N/A</div>
-      <div class="score-sub">Sensor telemetry</div>
-    </div>
-    <div class="score-card fusion" id="fusionCard">
-      <div class="score-label">Fusion Score</div>
-      <div class="score-value" id="fusionScore">N/A</div>
-      <div class="score-sub" id="fusionMode">—</div>
-    </div>
-  </div>
-
-  <!-- CHART -->
-  <div class="chart-container">
-    <canvas id="timeChart"></canvas>
-  </div>
-
-  <!-- BOTTOM: SHAP + ALERTS -->
-  <div class="bottom-row">
-    <div class="panel">
-      <div class="panel-title">SHAP Explanation</div>
-      <div class="shap-row">
-        <div class="shap-label">CYBER</div>
-        <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapCyberBar" style="width:0%;background:var(--blue-bright)"></div></div>
-        <div class="shap-pct" id="shapCyberPct">0%</div>
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">OT<span>Shield</span></div>
+    <div class="nav-center">
+      <div class="autopilot-badge">
+        <span class="status-dot"></span> AUTOPILOT DEFENSE: ON
       </div>
-      <div class="shap-detail" id="shapCyberLabel">—</div>
-      <div class="shap-row">
-        <div class="shap-label">PHYSICAL</div>
-        <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapPhysicalBar" style="width:0%;background:var(--green)"></div></div>
-        <div class="shap-pct" id="shapPhysicalPct">0%</div>
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">CONNECTED</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard">
+
+    <!-- SCORE CARDS -->
+    <div class="score-row">
+      <div class="score-card cyber">
+        <div class="score-label">Cyber</div>
+        <div class="score-value" id="cyberScore">N/A</div>
+        <div class="score-sub">Network layer</div>
       </div>
-      <div class="shap-detail" id="shapPhysicalLabel">—</div>
-      <div class="shap-detail" id="shapPhysicalLabel">—</div>
-      <div class="shap-action" id="actionText"><strong>Waiting for data...</strong></div>
+      <div class="score-card physical">
+        <div class="score-label">Physical</div>
+        <div class="score-value" id="physicalScore">N/A</div>
+        <div class="score-sub">Sensor telemetry</div>
+      </div>
+      <div class="score-card fusion" id="fusionCard">
+        <div class="score-label">Fusion Score</div>
+        <div class="score-value" id="fusionScore">N/A</div>
+        <div class="score-sub" id="fusionMode">—</div>
+      </div>
     </div>
-    <div class="panel">
-      <div class="panel-title">Alert Log</div>
-      <div class="alert-log" id="alertLog"></div>
+
+    <!-- CHART -->
+    <div class="chart-container">
+      <canvas id="timeChart"></canvas>
     </div>
+
+    <!-- BOTTOM: SHAP + ALERTS -->
+    <div class="bottom-row">
+      <div class="panel">
+        <div class="panel-title">SHAP Explanation</div>
+        <div class="shap-row">
+          <div class="shap-label">CYBER</div>
+          <div class="shap-bar-bg">
+            <div class="shap-bar-fill" id="shapCyberBar" style="width:0%;background:var(--blue-bright)"></div>
+          </div>
+          <div class="shap-pct" id="shapCyberPct">0%</div>
+        </div>
+        <div class="shap-detail" id="shapCyberLabel">—</div>
+        <div class="shap-row">
+          <div class="shap-label">PHYSICAL</div>
+          <div class="shap-bar-bg">
+            <div class="shap-bar-fill" id="shapPhysicalBar" style="width:0%;background:var(--green)"></div>
+          </div>
+          <div class="shap-pct" id="shapPhysicalPct">0%</div>
+        </div>
+        <div class="shap-detail" id="shapPhysicalLabel">—</div>
+        <div class="shap-detail" id="shapPhysicalLabel">—</div>
+        <div class="shap-action" id="actionText"><strong>Waiting for data...</strong></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Alert Log</div>
+        <div class="alert-log" id="alertLog"></div>
+      </div>
+    </div>
+
+    <!-- SCENARIO BUTTONS -->
+    <div class="scenario-row">
+      <button class="scenario-btn active" onclick="simulate('normal', this)">Normal</button>
+      <button class="scenario-btn cyber-btn" onclick="simulate('cyber_attack', this)">Cyber Attack</button>
+      <button class="scenario-btn physical-btn" onclick="simulate('physical_fault', this)">Physical Fault</button>
+      <button class="scenario-btn critical-btn" onclick="simulate('critical', this)">TRIGGER CHAOS (Critical)</button>
+    </div>
+
   </div>
 
-  <!-- SCENARIO BUTTONS -->
-  <div class="scenario-row">
-    <button class="scenario-btn active" onclick="simulate('normal', this)">Normal</button>
-    <button class="scenario-btn cyber-btn" onclick="simulate('cyber_attack', this)">Cyber Attack</button>
-    <button class="scenario-btn physical-btn" onclick="simulate('physical_fault', this)">Physical Fault</button>
-    <button class="scenario-btn critical-btn" onclick="simulate('critical', this)">TRIGGER CHAOS (Critical)</button>
   </div>
 
-  </div>
+  <!-- LOCKDOWN OVERLAY REMOVED -->
 
-</div>
+  <script>
+    const API = window.location.origin;
+    const MAX_POINTS = 60;
 
-<!-- LOCKDOWN OVERLAY REMOVED -->
+    // ─── Chart Setup ───
+    const ctx = document.getElementById('timeChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Cyber', data: [], borderColor: '#4D9FFF', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+          { label: 'Physical', data: [], borderColor: '#00CC88', borderWidth: 1.5, pointRadius: 0, tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 300 },
+        scales: {
+          x: { display: true, ticks: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 9 }, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { min: 0, max: 100, ticks: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 9 }, stepSize: 25 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        },
+        plugins: {
+          legend: { labels: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 10 }, boxWidth: 12, padding: 16 } }
+        }
+      }
+    });
 
-<script>
-const API = window.location.origin;
-const MAX_POINTS = 60;
+    // ─── State ───
+    const alerts = [];
 
-// ─── Chart Setup ───
-const ctx = document.getElementById('timeChart').getContext('2d');
-const chart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [
-      { label: 'Cyber',    data: [], borderColor: '#4D9FFF', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'Physical', data: [], borderColor: '#00CC88', borderWidth: 1.5, pointRadius: 0, tension: 0.3 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    animation: { duration: 300 },
-    scales: {
-      x: { display: true, ticks: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 9 }, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      y: { min: 0, max: 100, ticks: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 9 }, stepSize: 25 }, grid: { color: 'rgba(255,255,255,0.04)' } }
-    },
-    plugins: {
-      legend: { labels: { color: '#8A9BB0', font: { family: "'Share Tech Mono'", size: 10 }, boxWidth: 12, padding: 16 } }
+    function formatTime(iso) {
+      try { return new Date(iso).toLocaleTimeString('en-US', { hour12: false }); }
+      catch { return '--:--:--'; }
     }
-  }
-});
 
-// ─── State ───
-const alerts = [];
+    function scoreText(val) {
+      return val !== null && val !== undefined ? val.toFixed(1) : 'N/A';
+    }
 
-function formatTime(iso) {
-  try { return new Date(iso).toLocaleTimeString('en-US', { hour12: false }); }
-  catch { return '--:--:--'; }
-}
+    // ─── Risk colors ───
+    const riskBg = {
+      'SAFE': 'rgba(0,204,136,0.15)',
+      'WARNING': 'rgba(255,184,0,0.15)',
+      'CYBER THREAT': 'rgba(255,26,26,0.15)',
+      'PHYSICAL FAULT': 'rgba(153,102,255,0.15)',
+      'CRITICAL': 'rgba(255,26,26,0.15)',
+    };
+    const riskBorder = {
+      'SAFE': '#00CC88',
+      'WARNING': '#FFB800',
+      'CYBER THREAT': '#4D9FFF',
+      'PHYSICAL FAULT': '#9966FF',
+      'CRITICAL': '#FF1A1A',
+    };
+    const alertClass = {
+      'SAFE': 'SAFE', 'WARNING': 'WARNING', 'CYBER THREAT': 'CYBER',
+      'PHYSICAL FAULT': 'PHYSICAL', 'CRITICAL': 'CRITICAL',
+    };
 
-function scoreText(val) {
-  return val !== null && val !== undefined ? val.toFixed(1) : 'N/A';
-}
+    // ─── Update UI ───
+    function update(d) {
+      // Score cards
+      document.getElementById('cyberScore').textContent = scoreText(d.cyber_score);
+      document.getElementById('physicalScore').textContent = scoreText(d.physical_score);
+      document.getElementById('fusionScore').textContent = scoreText(d.fusion_score);
+      document.getElementById('fusionMode').textContent = d.mode_active || '—';
 
-// ─── Risk colors ───
-const riskBg = {
-  'SAFE':           'rgba(0,204,136,0.15)',
-  'WARNING':        'rgba(255,184,0,0.15)',
-  'CYBER THREAT':   'rgba(255,26,26,0.15)',
-  'PHYSICAL FAULT': 'rgba(153,102,255,0.15)',
-  'CRITICAL':       'rgba(255,26,26,0.15)',
-};
-const riskBorder = {
-  'SAFE':           '#00CC88',
-  'WARNING':        '#FFB800',
-  'CYBER THREAT':   '#4D9FFF',
-  'PHYSICAL FAULT': '#9966FF',
-  'CRITICAL':       '#FF1A1A',
-};
-const alertClass = {
-  'SAFE': 'SAFE', 'WARNING': 'WARNING', 'CYBER THREAT': 'CYBER',
-  'PHYSICAL FAULT': 'PHYSICAL', 'CRITICAL': 'CRITICAL',
-};
+      // Fusion card styling
+      const fc = document.getElementById('fusionCard');
+      fc.style.background = riskBg[d.risk_level] || 'var(--dark-2)';
+      fc.style.borderColor = riskBorder[d.risk_level] || 'rgba(255,255,255,0.08)';
+      const fusionBefore = riskBorder[d.risk_level] || 'var(--steel)';
+      fc.querySelector('.score-card.fusion::before') // can't style pseudo — use border-top
+      fc.style.borderTopColor = fusionBefore;
+      fc.style.borderTopWidth = '2px';
 
-// ─── Update UI ───
-function update(d) {
-  // Score cards
-  document.getElementById('cyberScore').textContent = scoreText(d.cyber_score);
-  document.getElementById('physicalScore').textContent = scoreText(d.physical_score);
-  document.getElementById('fusionScore').textContent = scoreText(d.fusion_score);
-  document.getElementById('fusionMode').textContent = d.mode_active || '—';
+      // SHAP
+      const s = d.shap_explanation;
+      document.getElementById('shapCyberBar').style.width = s.cyber.pct + '%';
+      document.getElementById('shapCyberPct').textContent = s.cyber.pct + '%';
+      document.getElementById('shapCyberLabel').textContent = s.cyber.label;
+      document.getElementById('shapPhysicalBar').style.width = s.physical.pct + '%';
+      document.getElementById('shapPhysicalPct').textContent = s.physical.pct + '%';
+      document.getElementById('shapPhysicalLabel').textContent = s.physical.label;
 
-  // Fusion card styling
-  const fc = document.getElementById('fusionCard');
-  fc.style.background = riskBg[d.risk_level] || 'var(--dark-2)';
-  fc.style.borderColor = riskBorder[d.risk_level] || 'rgba(255,255,255,0.08)';
-  const fusionBefore = riskBorder[d.risk_level] || 'var(--steel)';
-  fc.querySelector('.score-card.fusion::before') // can't style pseudo — use border-top
-  fc.style.borderTopColor = fusionBefore;
-  fc.style.borderTopWidth = '2px';
+      document.getElementById('actionText').innerHTML =
+        '<strong>' + d.risk_level + '</strong> — ' + d.recommended_action;
 
-  // SHAP
-  const s = d.shap_explanation;
-  document.getElementById('shapCyberBar').style.width = s.cyber.pct + '%';
-  document.getElementById('shapCyberPct').textContent = s.cyber.pct + '%';
-  document.getElementById('shapCyberLabel').textContent = s.cyber.label;
-  document.getElementById('shapPhysicalBar').style.width = s.physical.pct + '%';
-  document.getElementById('shapPhysicalPct').textContent = s.physical.pct + '%';
-  document.getElementById('shapPhysicalLabel').textContent = s.physical.label;
+      // Chart
+      const t = formatTime(d.timestamp);
+      chart.data.labels.push(t);
+      chart.data.datasets[0].data.push(d.cyber_score ?? 0);
+      chart.data.datasets[1].data.push(d.physical_score ?? 0);
+      if (chart.data.labels.length > MAX_POINTS) {
+        chart.data.labels.shift();
+        chart.data.datasets.forEach(ds => ds.data.shift());
+      }
+      chart.update();
 
-  document.getElementById('actionText').innerHTML =
-    '<strong>' + d.risk_level + '</strong> — ' + d.recommended_action;
+      // Alert log
+      if (d.risk_level !== 'SAFE') {
+        const cls = alertClass[d.risk_level] || '';
+        alerts.unshift({ time: t, level: d.risk_level, action: d.recommended_action, cls });
+        if (alerts.length > 10) alerts.pop();
+        renderAlerts();
+      }
+    }
 
-  // Chart
-  const t = formatTime(d.timestamp);
-  chart.data.labels.push(t);
-  chart.data.datasets[0].data.push(d.cyber_score ?? 0);
-  chart.data.datasets[1].data.push(d.physical_score ?? 0);
-  if (chart.data.labels.length > MAX_POINTS) {
-    chart.data.labels.shift();
-    chart.data.datasets.forEach(ds => ds.data.shift());
-  }
-  chart.update();
+    function renderAlerts() {
+      const el = document.getElementById('alertLog');
+      el.innerHTML = alerts.map(a =>
+        `<div class="alert-entry ${a.cls}">${a.time} [${a.level}] ${a.action}</div>`
+      ).join('');
+    }
 
-  // Alert log
-  if (d.risk_level !== 'SAFE') {
-    const cls = alertClass[d.risk_level] || '';
-    alerts.unshift({ time: t, level: d.risk_level, action: d.recommended_action, cls });
-    if (alerts.length > 10) alerts.pop();
-    renderAlerts();
-  }
-}
+    // ─── WebSocket ───
+    let ws;
+    function connect() {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(wsProtocol + '//' + window.location.host + '/ws');
+      ws.onopen = () => {
+        document.getElementById('statusDot').classList.remove('disconnected');
+        document.getElementById('statusText').textContent = 'CONNECTED';
+      };
+      ws.onmessage = (e) => {
+        try { update(JSON.parse(e.data)); } catch { }
+      };
+      ws.onclose = () => {
+        document.getElementById('statusDot').classList.add('disconnected');
+        document.getElementById('statusText').textContent = 'RECONNECTING';
+        setTimeout(connect, 3000);
+      };
+      ws.onerror = () => ws.close();
+    }
+    connect();
 
-function renderAlerts() {
-  const el = document.getElementById('alertLog');
-  el.innerHTML = alerts.map(a =>
-    `<div class="alert-entry ${a.cls}">${a.time} [${a.level}] ${a.action}</div>`
-  ).join('');
-}
+    // ─── Scenario Buttons ───
+    function showToast(msg, color) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.background = color || 'rgba(255, 26, 26, 0.9)';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
-// ─── WebSocket ───
-let ws;
-function connect() {
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(wsProtocol + '//' + window.location.host + '/ws');
-  ws.onopen = () => {
-    document.getElementById('statusDot').classList.remove('disconnected');
-    document.getElementById('statusText').textContent = 'CONNECTED';
-  };
-  ws.onmessage = (e) => {
-    try { update(JSON.parse(e.data)); } catch {}
-  };
-  ws.onclose = () => {
-    document.getElementById('statusDot').classList.add('disconnected');
-    document.getElementById('statusText').textContent = 'RECONNECTING';
-    setTimeout(connect, 3000);
-  };
-  ws.onerror = () => ws.close();
-}
-connect();
+    function simulate(mode, btn) {
+      fetch(API + '/simulate/' + mode, { method: 'POST' }).catch(() => { });
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-// ─── Scenario Buttons ───
-function showToast(msg, color) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.style.background = color || 'rgba(255, 26, 26, 0.9)';
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function simulate(mode, btn) {
-  fetch(API + '/simulate/' + mode, { method: 'POST' }).catch(() => {});
-  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  if (mode === 'normal') showToast('SYSTEM NORMALIZED — Restoring Baseline', 'rgba(0, 204, 136, 0.95)');
-  else if (mode === 'cyber_attack') showToast('INJECTING PAYLOAD — Network Anomaly', 'rgba(77, 159, 255, 0.95)');
-  else if (mode === 'physical_fault') showToast('OVERRIDING SENSORS — Physical Fault', 'rgba(153, 102, 255, 0.95)');
-  else if (mode === 'critical') showToast('TRIGGERING CHAOS — Multi-Layer Attack', 'rgba(255, 26, 26, 0.95)');
-}
-</script>
+      if (mode === 'normal') showToast('SYSTEM NORMALIZED — Restoring Baseline', 'rgba(0, 204, 136, 0.95)');
+      else if (mode === 'cyber_attack') showToast('INJECTING PAYLOAD — Network Anomaly', 'rgba(77, 159, 255, 0.95)');
+      else if (mode === 'physical_fault') showToast('OVERRIDING SENSORS — Physical Fault', 'rgba(153, 102, 255, 0.95)');
+      else if (mode === 'critical') showToast('TRIGGERING CHAOS — Multi-Layer Attack', 'rgba(255, 26, 26, 0.95)');
+    }
+  </script>
 </body>
+
 </html>
