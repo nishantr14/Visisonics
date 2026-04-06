@@ -1,7 +1,6 @@
-"""OTShield FastAPI backend — WebSocket broadcast + REST endpoints."""
+"""OTShield FastAPI backend -- WebSocket broadcast + REST endpoints."""
 
 import asyncio
-import random
 from datetime import datetime, timezone
 from collections import deque
 
@@ -13,8 +12,9 @@ import os
 
 from fusion import get_risk_score, classify_risk, get_recommended_action
 from api_models import PredictionPayload, StatusResponse, ShapExplanation, ShapFeature
+from supervised_scorer import get_supervised_score, reset_history
 
-# ── DATA SOURCE SWITCH ──────────────────────────────
+# -- DATA SOURCE SWITCH -----------------------------------------------------
 USE_REAL_PLC = False
 
 if USE_REAL_PLC:
@@ -22,11 +22,11 @@ if USE_REAL_PLC:
 else:
     from fake_plc_stream import get_current_reading, set_mode as stream_set_mode
 
-# ────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 
-app = FastAPI(title="OTShield API", version="0.1.0")
+app = FastAPI(title="OTShield API", version="0.2.0")
 
-# ── STATIC FILE SERVING ─────────────────────────────
+# -- STATIC FILE SERVING ----------------------------------------------------
 frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
@@ -50,90 +50,59 @@ connected_clients: list[WebSocket] = []
 current_mode: str = "normal"
 
 
-# ── PLACEHOLDER SCORING FUNCTIONS ───────────────────
-
-def _placeholder_cyber(reading: dict) -> float:
-    """Placeholder cyber score: returns 0-1 based on ATT_FLAG + noise."""
-    base = 0.7 if reading.get('ATT_FLAG', 0) == 1 else 0.15
-    return round(min(1.0, max(0.0, base + random.gauss(0, 0.08))), 4)
-
-
-def _placeholder_physical(reading: dict) -> float:
-    """Placeholder physical score: derived from sensor deviations."""
-    l_avg = (reading.get('L_T1', 5) + reading.get('L_T2', 5) + reading.get('L_T3', 5)) / 3
-    deviation = abs(l_avg - 5.0) / 5.0
-    base = min(1.0, deviation + 0.1)
-    if reading.get('ATT_FLAG', 0) == 1:
-        base = max(base, 0.5)
-    return round(min(1.0, max(0.0, base + random.gauss(0, 0.05))), 4)
-
-
-# ── BUILD PREDICTION PAYLOAD ────────────────────────
+# -- BUILD PREDICTION PAYLOAD -----------------------------------------------
 
 def build_payload(reading: dict) -> dict:
-    # ── CYBER LAYER HOOK ──────────────────────────────────────────
-    # Uncomment to activate real cyber layer:
-    # from cyber_layer import get_cyber_score
-    # cyber_score, cyber_explanation, cyber_top_feature = get_cyber_score(reading)
-    #
-    # Placeholder (remove when above is active):
-    cyber_score = _placeholder_cyber(reading)
-    cyber_explanation = ""
-    cyber_top_feature = ""
+    # -- REAL MODEL SCORING (0-100 scale) --
+    # Single unified model — score once, use for both layers
+    score, explanation, top_feature = get_supervised_score(reading)
+    cyber_score = score
+    physical_score = score
+    cyber_top_feature = top_feature
+    physical_top_feature = top_feature
 
-    # ── PHYSICAL LAYER HOOK ───────────────────────────────────────
-    # Uncomment to activate real physical layer:
-    # from physical_layer import get_physical_score
-    # physical_score, physical_explanation, physical_top_feature = get_physical_score(reading)
-    #
-    # Placeholder (remove when above is active):
-    physical_score = _placeholder_physical(reading)
-    physical_explanation = ""
-    physical_top_feature = ""
-
-    # ── AUDIO LAYER HOOK ──────────────────────────────
-    # Replace this block with: from acoustic_layer import get_acoustic_score
+    # Audio/Visual layers (not yet implemented)
     audio_score = None
-
-    # ── VISUAL LAYER HOOK ─────────────────────────────
-    # Replace this block with: from visual_layer import get_visual_score
     visual_score = None
 
-    fusion_score, mode_active = get_risk_score(cyber_score, physical_score, audio_score, visual_score)
-    risk_level = classify_risk(cyber_score, physical_score, audio_score, visual_score)
+    # Fusion expects 0-1 scale inputs
+    cyber_01 = cyber_score / 100.0
+    physical_01 = physical_score / 100.0
+
+    fusion_score, mode_active = get_risk_score(cyber_01, physical_01, audio_score, visual_score)
+    risk_level = classify_risk(cyber_01, physical_01, audio_score, visual_score)
 
     # SHAP-style explanation
-    total = cyber_score + physical_score + (audio_score or 0) + (visual_score or 0)
-    if total == 0:
-        total = 1.0
+    total = cyber_score + physical_score + 0.01  # avoid div by zero
 
     cyber_label = cyber_top_feature if cyber_top_feature else (
-        "Network command anomaly" if cyber_score > 0.5 else "Network baseline normal"
+        "Network command anomaly" if cyber_score > 50 else "Network baseline normal"
     )
+    physical_label = physical_top_feature if physical_top_feature else "Sensor deviation"
+
     shap = ShapExplanation(
         cyber=ShapFeature(
             label=cyber_label,
             pct=round(cyber_score / total * 100, 1),
         ),
         audio=ShapFeature(
-            label="Acoustic deviation detected" if (audio_score or 0) > 0.5 else "Acoustic baseline normal",
-            pct=round((audio_score or 0) / total * 100, 1),
+            label="Acoustic baseline normal",
+            pct=0.0,
         ),
         visual=ShapFeature(
-            label="Visual anomaly flagged" if (visual_score or 0) > 0.5 else "Visual feed normal",
-            pct=round((visual_score or 0) / total * 100, 1),
+            label="Visual feed normal",
+            pct=0.0,
         ),
     )
 
-    physical_label = physical_top_feature if physical_top_feature else "Sensor deviation"
     top_feature = cyber_label if cyber_score >= physical_score else physical_label
     action = get_recommended_action(risk_level, top_feature)
 
     payload = PredictionPayload(
-        cyber_score=round(cyber_score * 100, 1),
-        physical_score=round(physical_score * 100, 1),
-        audio_score=round(audio_score * 100, 1) if audio_score is not None else None,
-        visual_score=round(visual_score * 100, 1) if visual_score is not None else None,
+        cyber_score=round(cyber_score, 1),       # already 0-100
+        physical_score=round(physical_score, 1),  # already 0-100
+        audio_score=None,
+        visual_score=None,
         fusion_score=fusion_score,
         risk_level=risk_level,
         mode_active=mode_active,
@@ -144,7 +113,7 @@ def build_payload(reading: dict) -> dict:
     return payload.model_dump()
 
 
-# ── WEBSOCKET ───────────────────────────────────────
+# -- WEBSOCKET ---------------------------------------------------------------
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
@@ -173,7 +142,7 @@ async def websocket_endpoint(ws: WebSocket):
             connected_clients.remove(ws)
 
 
-# ── REST ENDPOINTS ──────────────────────────────────
+# -- REST ENDPOINTS ----------------------------------------------------------
 
 @app.post("/simulate/{mode}")
 async def simulate(mode: str):

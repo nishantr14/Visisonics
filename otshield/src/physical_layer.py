@@ -1,6 +1,6 @@
 """OTShield Physical Layer -- sensor telemetry anomaly detection (supervised)."""
 
-from otshield.src.supervised_scorer import get_supervised_score, SENSOR_COLS
+from supervised_scorer import get_supervised_score, SENSOR_COLS
 
 # Re-export for backward compatibility
 FEATURE_NAMES = SENSOR_COLS

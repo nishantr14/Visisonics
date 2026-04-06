@@ -145,12 +145,15 @@ mean_f1 = np.mean(f1_scores)
 mean_thresh = np.mean(thresholds)
 print(f"\n  >> MEAN CV F1: {mean_f1:.4f}  mean threshold: {mean_thresh:.2f}")
 
-# -- 5. Retrain on full data + find optimal threshold -----------------------
+# -- 5. Final model: train on dataset03 + dataset04 with CV threshold ------
+# Use the CV-derived mean threshold (not re-optimized on test data)
+# This avoids overfitting: the model never "sees" labels it's tuned on.
 
 print("\n" + "=" * 70)
-print("FINAL MODEL TRAINING")
+print("FINAL MODEL TRAINING (no data leakage)")
 print("=" * 70)
 
+# Train on ALL data (standard practice — CV gave honest generalization estimate)
 X_all = np.vstack([X3_scaled, X4_scaled])
 y_all = np.concatenate([np.zeros(len(X3_scaled)), y4])
 
@@ -160,19 +163,18 @@ final_model = RandomForestClassifier(
 )
 final_model.fit(X_all, y_all)
 
-# Optimal threshold on dataset04
-y_proba_final = final_model.predict_proba(X4_scaled)[:, 1]
-opt_thresh, best_final_f1 = 0.5, 0
-for t in np.arange(0.02, 0.98, 0.01):
-    f1 = f1_score(y4, (y_proba_final >= t).astype(int), zero_division=0)
-    if f1 > best_final_f1:
-        best_final_f1 = f1
-        opt_thresh = t
+# Use the CV-averaged threshold (NOT re-optimized on full dataset04)
+opt_thresh = round(mean_thresh, 2)
 
+# Report performance with CV threshold (informational only)
+y_proba_final = final_model.predict_proba(X4_scaled)[:, 1]
 y_pred = (y_proba_final >= opt_thresh).astype(int)
+final_f1 = f1_score(y4, y_pred)
 final_auc = roc_auc_score(y4, y_proba_final)
 
-print(f"Final: F1={best_final_f1:.4f}  AUC={final_auc:.4f}  threshold={opt_thresh:.2f}")
+print(f"CV threshold used: {opt_thresh:.2f}")
+print(f"Dataset04 F1 (informational): {final_f1:.4f}  AUC: {final_auc:.4f}")
+print(f"Honest CV F1 (generalization): {mean_f1:.4f}")
 print(classification_report(y4, y_pred, target_names=["Normal", "Attack"]))
 
 # Feature importance
@@ -194,9 +196,9 @@ with open(os.path.join(MODELS, "supervised_meta.json"), "w") as f:
     json.dump({
         "best_model": "random_forest",
         "cv_f1": round(mean_f1, 4),
-        "final_f1": round(best_final_f1, 4),
+        "final_f1": round(final_f1, 4),
         "final_auc": round(final_auc, 4),
-        "optimal_threshold": round(opt_thresh, 4),
+        "optimal_threshold": opt_thresh,
         "n_features": len(ALL_FEATURE_NAMES),
         "sensor_cols": SENSOR_COLS,
     }, f, indent=2)
@@ -205,4 +207,4 @@ print(f"\n[OK] Model saved: models/supervised_model.pkl")
 print(f"[OK] Scaler saved: models/scaler_supervised.pkl")
 print(f"[OK] Features saved: models/feature_names_supervised.json ({len(ALL_FEATURE_NAMES)} features)")
 print(f"[OK] Meta saved: models/supervised_meta.json")
-print(f"\nDone! CV F1={mean_f1:.4f}, Final F1={best_final_f1:.4f}")
+print(f"\nDone! CV F1={mean_f1:.4f}, Final F1={final_f1:.4f}")

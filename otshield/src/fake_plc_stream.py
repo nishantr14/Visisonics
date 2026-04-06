@@ -8,43 +8,67 @@ import pandas as pd
 
 
 class FakePLCStream:
-    COLUMNS = ['F_PU1', 'F_PU2', 'P_J280', 'P_J269', 'L_T1', 'L_T2', 'L_T3', 'S_PU1', 'ATT_FLAG']
+    """Streams BATADAL sensor data (all 43 columns) for testing."""
 
     def __init__(self):
         self._mode = "normal"
         self._index = 0
         self._data = None
+        self._normal_rows = None
+        self._attack_rows = None
         self._load_csv()
 
     def _load_csv(self):
         csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'BATADAL_dataset04.csv')
         try:
             df = pd.read_csv(csv_path)
-            # Normalize column names
             df.columns = [c.strip() for c in df.columns]
             if 'ATT_FLAG' in df.columns:
                 self._data = df
+                self._sensor_cols = [c for c in df.columns if c not in ['DATETIME', 'ATT_FLAG']]
+                self._normal_rows = df[df['ATT_FLAG'] != 1]
+                self._attack_rows = df[df['ATT_FLAG'] == 1]
         except FileNotFoundError:
             self._data = None
+            self._sensor_cols = ['L_T1', 'L_T2', 'L_T3', 'L_T4', 'L_T5', 'L_T6', 'L_T7',
+                                 'F_PU1', 'S_PU1', 'F_PU2', 'S_PU2', 'F_PU3', 'S_PU3',
+                                 'F_PU4', 'S_PU4', 'F_PU5', 'S_PU5', 'F_PU6', 'S_PU6',
+                                 'F_PU7', 'S_PU7', 'F_PU8', 'S_PU8', 'F_PU9', 'S_PU9',
+                                 'F_PU10', 'S_PU10', 'F_PU11', 'S_PU11', 'F_V2', 'S_V2',
+                                 'P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415',
+                                 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 
     def _synthetic_reading(self, attack=False):
+        """Fallback: generate synthetic data for all 43 sensors."""
         t = time.time()
-        base = {
-            'F_PU1':  round(2.0 + 0.3 * math.sin(t * 0.1) + random.gauss(0, 0.05), 4),
-            'F_PU2':  round(1.8 + 0.2 * math.sin(t * 0.15) + random.gauss(0, 0.04), 4),
-            'P_J280': round(0.5 + 0.1 * math.sin(t * 0.08) + random.gauss(0, 0.02), 4),
-            'P_J269': round(0.45 + 0.08 * math.sin(t * 0.12) + random.gauss(0, 0.02), 4),
-            'L_T1':   round(5.0 + 0.5 * math.sin(t * 0.05) + random.gauss(0, 0.1), 4),
-            'L_T2':   round(4.5 + 0.4 * math.sin(t * 0.06) + random.gauss(0, 0.1), 4),
-            'L_T3':   round(4.8 + 0.3 * math.sin(t * 0.07) + random.gauss(0, 0.1), 4),
-            'S_PU1':  1,
-            'ATT_FLAG': 1 if attack else 0,
-        }
+        reading = {}
+        # Levels
+        for i in range(1, 8):
+            base = 5.0 + 0.5 * math.sin(t * 0.05 + i)
+            reading[f'L_T{i}'] = round(base + random.gauss(0, 0.1), 4)
+        # Flows
+        for i in range(1, 12):
+            base = 2.0 + 0.3 * math.sin(t * 0.1 + i) if i <= 4 else 0.0
+            reading[f'F_PU{i}'] = round(max(0, base + random.gauss(0, 0.05)), 4)
+        reading['F_V2'] = round(1.5 + 0.2 * math.sin(t * 0.08) + random.gauss(0, 0.03), 4)
+        # Statuses
+        for i in range(1, 12):
+            reading[f'S_PU{i}'] = 1 if reading.get(f'F_PU{i}', 0) > 0.5 else 0
+        reading['S_V2'] = 1 if reading['F_V2'] > 0.5 else 0
+        # Pressures
+        for jname in ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415',
+                       'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']:
+            base = 40.0 + 5.0 * math.sin(t * 0.07 + hash(jname) % 10)
+            reading[jname] = round(base + random.gauss(0, 1.0), 4)
+
+        reading['ATT_FLAG'] = 1 if attack else 0
+
         if attack:
-            base['F_PU1'] += random.uniform(0.5, 2.0)
-            base['P_J280'] += random.uniform(0.3, 1.0)
-            base['L_T1'] += random.uniform(1.0, 3.0)
-        return base
+            reading['F_PU1'] += random.uniform(0.5, 2.0)
+            reading['P_J280'] += random.uniform(5, 15)
+            reading['L_T1'] += random.uniform(1.0, 3.0)
+
+        return reading
 
     def set_mode(self, mode: str):
         valid = ("normal", "cyber_attack", "physical_fault", "critical")
@@ -56,31 +80,30 @@ class FakePLCStream:
         attack = self._mode != "normal"
 
         if self._data is not None:
-            if attack:
-                subset = self._data[self._data['ATT_FLAG'] == 1]
-            else:
-                subset = self._data[self._data['ATT_FLAG'] == 0]
-
+            subset = self._attack_rows if attack else self._normal_rows
             if len(subset) == 0:
                 return self._synthetic_reading(attack)
 
             row = subset.iloc[self._index % len(subset)]
             self._index += 1
-            reading = {col: float(row[col]) if col != 'ATT_FLAG' else int(row[col])
-                       for col in self.COLUMNS if col in row.index}
+
+            # Return ALL sensor columns (not just 9)
+            reading = {}
+            for col in self._sensor_cols:
+                if col in row.index:
+                    reading[col] = float(row[col])
+            reading['ATT_FLAG'] = int(row.get('ATT_FLAG', 0))
         else:
             reading = self._synthetic_reading(attack)
             self._index += 1
 
         # Apply mode-specific amplification
         if self._mode == "physical_fault":
-            for key in ('L_T1', 'L_T2', 'L_T3'):
-                if key in reading:
-                    reading[key] = round(reading[key] * 1.3, 4)
+            for key in [c for c in reading if c.startswith('L_T')]:
+                reading[key] = round(reading[key] * 1.3, 4)
         elif self._mode == "critical":
-            for key in ('F_PU1', 'F_PU2', 'P_J280', 'P_J269', 'L_T1', 'L_T2', 'L_T3'):
-                if key in reading:
-                    reading[key] = round(reading[key] * 1.5, 4)
+            for key in [c for c in reading if c.startswith(('F_PU', 'P_J', 'L_T', 'F_V'))]:
+                reading[key] = round(reading[key] * 1.5, 4)
 
         return reading
 
