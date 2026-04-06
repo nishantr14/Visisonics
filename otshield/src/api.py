@@ -71,9 +71,15 @@ def _placeholder_physical(reading: dict) -> float:
 # ── BUILD PREDICTION PAYLOAD ────────────────────────
 
 def build_payload(reading: dict) -> dict:
-    # ── CYBER LAYER HOOK ──────────────────────────────
-    # Replace this block with: from cyber_layer import get_cyber_score
+    # ── CYBER LAYER HOOK ──────────────────────────────────────────
+    # Uncomment to activate real cyber layer:
+    # from cyber_layer import get_cyber_score
+    # cyber_score, cyber_explanation, cyber_top_feature = get_cyber_score(reading)
+    #
+    # Placeholder (remove when above is active):
     cyber_score = _placeholder_cyber(reading)
+    cyber_explanation = ""
+    cyber_top_feature = ""
 
     # ── PHYSICAL LAYER HOOK ───────────────────────────
     # Replace this block with: from physical_layer import get_physical_score
@@ -90,13 +96,17 @@ def build_payload(reading: dict) -> dict:
     fusion_score, mode_active = get_risk_score(cyber_score, physical_score, audio_score, visual_score)
     risk_level = classify_risk(cyber_score, physical_score, audio_score, visual_score)
 
-    # SHAP-style explanation (placeholder percentages)
+    # SHAP-style explanation
     total = cyber_score + physical_score + (audio_score or 0) + (visual_score or 0)
     if total == 0:
         total = 1.0
+
+    cyber_label = cyber_top_feature if cyber_top_feature else (
+        "Network command anomaly" if cyber_score > 0.5 else "Network baseline normal"
+    )
     shap = ShapExplanation(
         cyber=ShapFeature(
-            label="Network command anomaly" if cyber_score > 0.5 else "Network baseline normal",
+            label=cyber_label,
             pct=round(cyber_score / total * 100, 1),
         ),
         audio=ShapFeature(
@@ -109,7 +119,7 @@ def build_payload(reading: dict) -> dict:
         ),
     )
 
-    top_feature = shap.cyber.label if cyber_score >= physical_score else "Sensor deviation"
+    top_feature = cyber_label if cyber_score >= physical_score else "Sensor deviation"
     action = get_recommended_action(risk_level, top_feature)
 
     payload = PredictionPayload(
