@@ -50,6 +50,11 @@
       font-family: var(--mono); font-size: 11px;
       letter-spacing: 2px; text-transform: uppercase;
     }
+    .autopilot-badge {
+      display: flex; align-items: center; gap: 8px; margin-right: 24px;
+      background: rgba(0,204,136,0.1); border: 1px solid #00CC88;
+      padding: 6px 14px; border-radius: 2px; color: #00CC88;
+    }
     .status-dot {
       width: 8px; height: 8px; border-radius: 50%;
       background: var(--green); display: inline-block;
@@ -73,7 +78,7 @@
 
     /* ─── SCORE CARDS ─── */
     .score-row {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
     }
     .score-card {
       background: var(--dark-2); border: 1px solid rgba(255,255,255,0.08);
@@ -216,6 +221,9 @@
 <nav>
   <div class="nav-logo">OT<span>Shield</span></div>
   <div class="nav-center">
+    <div class="autopilot-badge">
+      <span class="status-dot"></span> AUTOPILOT DEFENSE: ON
+    </div>
     <span class="status-dot" id="statusDot"></span>
     <span id="statusText">CONNECTED</span>
   </div>
@@ -239,16 +247,6 @@
       <div class="score-label">Physical</div>
       <div class="score-value" id="physicalScore">N/A</div>
       <div class="score-sub">Sensor telemetry</div>
-    </div>
-    <div class="score-card audio">
-      <div class="score-label">Audio</div>
-      <div class="score-value" id="audioScore">N/A</div>
-      <div class="score-sub">Acoustic layer</div>
-    </div>
-    <div class="score-card visual">
-      <div class="score-label">Visual</div>
-      <div class="score-value" id="visualScore">N/A</div>
-      <div class="score-sub">Camera layer</div>
     </div>
     <div class="score-card fusion" id="fusionCard">
       <div class="score-label">Fusion Score</div>
@@ -278,18 +276,7 @@
         <div class="shap-pct" id="shapPhysicalPct">0%</div>
       </div>
       <div class="shap-detail" id="shapPhysicalLabel">—</div>
-      <div class="shap-row">
-        <div class="shap-label">AUDIO</div>
-        <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapAudioBar" style="width:0%;background:var(--green)"></div></div>
-        <div class="shap-pct" id="shapAudioPct">0%</div>
-      </div>
-      <div class="shap-detail" id="shapAudioLabel">—</div>
-      <div class="shap-row">
-        <div class="shap-label">VISUAL</div>
-        <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapVisualBar" style="width:0%;background:var(--purple)"></div></div>
-        <div class="shap-pct" id="shapVisualPct">0%</div>
-      </div>
-      <div class="shap-detail" id="shapVisualLabel">—</div>
+      <div class="shap-detail" id="shapPhysicalLabel">—</div>
       <div class="shap-action" id="actionText"><strong>Waiting for data...</strong></div>
     </div>
     <div class="panel">
@@ -306,6 +293,14 @@
     <button class="scenario-btn critical-btn" onclick="simulate('critical', this)">TRIGGER CHAOS (Critical)</button>
   </div>
 
+  </div>
+
+</div>
+
+<!-- LOCKDOWN OVERLAY -->
+<div id="lockdownOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(4,6,8,0.95);z-index:900;flex-direction:column;justify-content:center;align-items:center;">
+    <h1 style="color:var(--red-bright);font-family:var(--cond);font-size:72px;letter-spacing:10px;animation:pulse-red 1s infinite;text-align:center;">CRITICAL THREAT DETECTED</h1>
+    <h2 style="color:var(--steel);font-family:var(--mono);font-size:24px;margin-top:20px;text-align:center;" id="lockdownText">Autopilot Initiating PLC Isolation in 3...</h2>
 </div>
 
 <script>
@@ -320,9 +315,7 @@ const chart = new Chart(ctx, {
     labels: [],
     datasets: [
       { label: 'Cyber',    data: [], borderColor: '#4D9FFF', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'Physical', data: [], borderColor: '#00CC88', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'Audio',    data: [], borderColor: '#9966FF', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'Visual',   data: [], borderColor: '#FFB800', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      { label: 'Physical', data: [], borderColor: '#00CC88', borderWidth: 1.5, pointRadius: 0, tension: 0.3 }
     ]
   },
   options: {
@@ -375,8 +368,6 @@ function update(d) {
   // Score cards
   document.getElementById('cyberScore').textContent = scoreText(d.cyber_score);
   document.getElementById('physicalScore').textContent = scoreText(d.physical_score);
-  document.getElementById('audioScore').textContent = scoreText(d.audio_score);
-  document.getElementById('visualScore').textContent = scoreText(d.visual_score);
   document.getElementById('fusionScore').textContent = scoreText(d.fusion_score);
   document.getElementById('fusionMode').textContent = d.mode_active || '—';
 
@@ -397,12 +388,6 @@ function update(d) {
   document.getElementById('shapPhysicalBar').style.width = s.physical.pct + '%';
   document.getElementById('shapPhysicalPct').textContent = s.physical.pct + '%';
   document.getElementById('shapPhysicalLabel').textContent = s.physical.label;
-  document.getElementById('shapAudioBar').style.width = s.audio.pct + '%';
-  document.getElementById('shapAudioPct').textContent = s.audio.pct + '%';
-  document.getElementById('shapAudioLabel').textContent = s.audio.label;
-  document.getElementById('shapVisualBar').style.width = s.visual.pct + '%';
-  document.getElementById('shapVisualPct').textContent = s.visual.pct + '%';
-  document.getElementById('shapVisualLabel').textContent = s.visual.label;
 
   document.getElementById('actionText').innerHTML =
     '<strong>' + d.risk_level + '</strong> — ' + d.recommended_action;
@@ -412,8 +397,6 @@ function update(d) {
   chart.data.labels.push(t);
   chart.data.datasets[0].data.push(d.cyber_score ?? 0);
   chart.data.datasets[1].data.push(d.physical_score ?? 0);
-  chart.data.datasets[2].data.push(d.audio_score ?? 0);
-  chart.data.datasets[3].data.push(d.visual_score ?? 0);
   if (chart.data.labels.length > MAX_POINTS) {
     chart.data.labels.shift();
     chart.data.datasets.forEach(ds => ds.data.shift());
@@ -426,6 +409,10 @@ function update(d) {
     alerts.unshift({ time: t, level: d.risk_level, action: d.recommended_action, cls });
     if (alerts.length > 10) alerts.pop();
     renderAlerts();
+  }
+
+  if (d.risk_level === 'CRITICAL' && !window.lockdownActive) {
+      triggerLockdown();
   }
 }
 
@@ -475,6 +462,43 @@ function simulate(mode, btn) {
   else if (mode === 'cyber_attack') showToast('INJECTING PAYLOAD — Network Anomaly', 'rgba(77, 159, 255, 0.95)');
   else if (mode === 'physical_fault') showToast('OVERRIDING SENSORS — Physical Fault', 'rgba(153, 102, 255, 0.95)');
   else if (mode === 'critical') showToast('TRIGGERING CHAOS — Multi-Layer Attack', 'rgba(255, 26, 26, 0.95)');
+}
+
+window.lockdownActive = false;
+function triggerLockdown() {
+  if(window.lockdownActive) return;
+  window.lockdownActive = true;
+  document.getElementById('lockdownOverlay').style.display = 'flex';
+  
+  let t = 3;
+  document.getElementById('lockdownText').textContent = `Autopilot Initiating PLC Hardware Isolation in ${t}...`;
+  document.getElementById('lockdownText').style.color = "var(--steel)";
+  
+  let intv = setInterval(() => {
+    t--;
+    if(t>0) {
+       document.getElementById('lockdownText').textContent = `Autopilot Initiating PLC Hardware Isolation in ${t}...`;
+    } else {
+       clearInterval(intv);
+       document.getElementById('lockdownText').innerHTML = `
+          <div style="color:#00CC88;font-size:36px;font-weight:bold;">
+            ✔️ SHIELD ACTIVATED<br>COMPROMISED ICS CONNECTION SEVERED
+          </div>
+       `;
+       // Automatically kill the attack by sending normal status to backend
+       fetch(API + '/simulate/normal', { method: 'POST' }).catch(() => {});
+       
+       setTimeout(() => {
+           document.getElementById('lockdownOverlay').style.display = 'none';
+           showToast('THREAT NEUTRALIZED — Physical Hardware Safe', 'rgba(0, 204, 136, 0.95)');
+           window.lockdownActive = false;
+           
+           // Reset buttons on ui
+           document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+           document.querySelector('.scenario-btn').classList.add('active'); 
+       }, 3500);
+    }
+  }, 1000);
 }
 </script>
 </body>
