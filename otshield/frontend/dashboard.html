@@ -297,11 +297,7 @@
 
 </div>
 
-<!-- LOCKDOWN OVERLAY -->
-<div id="lockdownOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(4,6,8,0.95);z-index:900;flex-direction:column;justify-content:center;align-items:center;">
-    <h1 style="color:var(--red-bright);font-family:var(--cond);font-size:72px;letter-spacing:10px;animation:pulse-red 1s infinite;text-align:center;">CRITICAL THREAT DETECTED</h1>
-    <h2 style="color:var(--steel);font-family:var(--mono);font-size:24px;margin-top:20px;text-align:center;" id="lockdownText">Autopilot Initiating PLC Isolation in 3...</h2>
-</div>
+<!-- LOCKDOWN OVERLAY REMOVED -->
 
 <script>
 const API = window.location.origin;
@@ -410,10 +406,6 @@ function update(d) {
     if (alerts.length > 10) alerts.pop();
     renderAlerts();
   }
-
-  if (d.risk_level === 'CRITICAL' && !window.lockdownActive) {
-      triggerLockdown();
-  }
 }
 
 function renderAlerts() {
@@ -462,43 +454,6 @@ function simulate(mode, btn) {
   else if (mode === 'cyber_attack') showToast('INJECTING PAYLOAD — Network Anomaly', 'rgba(77, 159, 255, 0.95)');
   else if (mode === 'physical_fault') showToast('OVERRIDING SENSORS — Physical Fault', 'rgba(153, 102, 255, 0.95)');
   else if (mode === 'critical') showToast('TRIGGERING CHAOS — Multi-Layer Attack', 'rgba(255, 26, 26, 0.95)');
-}
-
-window.lockdownActive = false;
-function triggerLockdown() {
-  if(window.lockdownActive) return;
-  window.lockdownActive = true;
-  document.getElementById('lockdownOverlay').style.display = 'flex';
-  
-  let t = 3;
-  document.getElementById('lockdownText').textContent = `Autopilot Initiating PLC Hardware Isolation in ${t}...`;
-  document.getElementById('lockdownText').style.color = "var(--steel)";
-  
-  let intv = setInterval(() => {
-    t--;
-    if(t>0) {
-       document.getElementById('lockdownText').textContent = `Autopilot Initiating PLC Hardware Isolation in ${t}...`;
-    } else {
-       clearInterval(intv);
-       document.getElementById('lockdownText').innerHTML = `
-          <div style="color:#00CC88;font-size:36px;font-weight:bold;">
-            ✔️ SHIELD ACTIVATED<br>COMPROMISED ICS CONNECTION SEVERED
-          </div>
-       `;
-       // Automatically kill the attack by sending normal status to backend
-       fetch(API + '/simulate/normal', { method: 'POST' }).catch(() => {});
-       
-       setTimeout(() => {
-           document.getElementById('lockdownOverlay').style.display = 'none';
-           showToast('THREAT NEUTRALIZED — Physical Hardware Safe', 'rgba(0, 204, 136, 0.95)');
-           window.lockdownActive = false;
-           
-           // Reset buttons on ui
-           document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-           document.querySelector('.scenario-btn').classList.add('active'); 
-       }, 3500);
-    }
-  }, 1000);
 }
 </script>
 </body>
