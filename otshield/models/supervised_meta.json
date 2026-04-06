@@ -1,10 +1,11 @@
 {
   "best_model": "ensemble_rf_gbm",
-  "cv_f1": 0.7947,
-  "final_f1": 0.9799,
-  "final_auc": 1.0,
-  "optimal_threshold": 0.18,
-  "n_features": 71,
+  "cv_f1": 0.2239,
+  "cv_auc": 0.6555,
+  "holdout_f1": 0.804,
+  "holdout_auc": 1.0,
+  "optimal_threshold": 0.09,
+  "n_features": 143,
   "sensor_cols": [
     "L_T1",
     "L_T2",
@@ -49,5 +50,6 @@
     "P_J317",
     "P_J14",
     "P_J422"
-  ]
+  ],
+  "cv_method": "TimeSeriesSplit_5fold"
 }

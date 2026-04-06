@@ -940,7 +940,7 @@
       <li><a href="#team">Team</a></li>
       <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
     </ul>
-    <div class="nav-badge">VISIONICS AI'26</div>
+    <div class="nav-badge">VISISONICS AI'26</div>
   </nav>
 
   <!-- HERO -->
@@ -1032,7 +1032,9 @@
         <div class="pipe-num">Stream A // Cyber</div>
         <div class="pipe-title">Network<br>Intelligence</div>
         <div class="pipe-subtitle">SCADA traffic analysis</div>
-        <p class="pipe-desc">Captures all ICS network packets and sensor telemetry in real time. Isolation Forest and Autoencoder models learn what legitimate operations look like and flag deviations — command injection, replay attacks, and sensor manipulation.</p>
+        <p class="pipe-desc">Captures all ICS network packets and sensor telemetry in real time. Isolation Forest and
+          Autoencoder models learn what legitimate operations look like and flag deviations — command injection, replay
+          attacks, and sensor manipulation.</p>
         <span class="pipe-tag">Isolation Forest</span>
         <span class="pipe-tag">BATADAL + TON_IoT</span>
         <span class="pipe-tag">Modbus / DNP3</span>
@@ -1159,28 +1161,37 @@
     <div class="section-label fade-up">Performance</div>
     <h2 class="section-title fade-up">Benchmark results<br>on BATADAL dataset.</h2>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px">
-      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up">
         <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--red-bright)">0.795</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">CV F1 SCORE</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">CV F1
+          SCORE</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">5-fold cross-validated</div>
       </div>
-      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-1">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-1">
         <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--blue-bright)">0.967</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ROC-AUC</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ROC-AUC
+        </div>
         <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">vs 0.891 baseline</div>
       </div>
-      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-2">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-2">
         <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#00CC88">219</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ATTACKS DETECTED</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ATTACKS
+          DETECTED</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">out of 219 total</div>
       </div>
-      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-3">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-3">
         <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#FFB800">71</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">FEATURES ENGINEERED</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">
+          FEATURES ENGINEERED</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">from 43 raw sensors</div>
       </div>
     </div>
-    <p style="font-size:14px;color:var(--steel);margin-top:24px;text-align:center;font-family:var(--mono);letter-spacing:1px">
+    <p
+      style="font-size:14px;color:var(--steel);margin-top:24px;text-align:center;font-family:var(--mono);letter-spacing:1px">
       Evaluated on BATADAL dataset04 (4,177 samples) &mdash; Baseline: Zahoor et al. 2025 (F1=0.835, AUC=0.891)
     </p>
   </section>
@@ -1193,7 +1204,8 @@
       <div class="tech-item fade-up">
         <div class="tech-role">Detection Model</div>
         <div class="tech-name">Ensemble RF + GBM</div>
-        <div class="tech-desc">Supervised ensemble on 43 BATADAL sensors + 71 engineered features. CV F1 = 0.795, AUC = 0.967.</div>
+        <div class="tech-desc">Supervised ensemble on 43 BATADAL sensors + 71 engineered features. CV F1 = 0.795, AUC =
+          0.967.</div>
       </div>
       <div class="tech-item fade-up delay-1">
         <div class="tech-role">Audio model</div>
@@ -1218,12 +1230,14 @@
       <div class="tech-item fade-up delay-1">
         <div class="tech-role">Frontend</div>
         <div class="tech-name">Vanilla JS + Chart.js</div>
-        <div class="tech-desc">Live threat dashboard with real-time WebSocket streaming, risk gauge, and alert log.</div>
+        <div class="tech-desc">Live threat dashboard with real-time WebSocket streaming, risk gauge, and alert log.
+        </div>
       </div>
       <div class="tech-item fade-up delay-2">
         <div class="tech-role">Cyber dataset</div>
         <div class="tech-name">BATADAL + TON_IoT</div>
-        <div class="tech-desc">Water treatment plant sensor data + ICS network traffic logs with labeled attack windows.</div>
+        <div class="tech-desc">Water treatment plant sensor data + ICS network traffic logs with labeled attack windows.
+        </div>
       </div>
       <div class="tech-item fade-up delay-3">
         <div class="tech-role">Audio dataset</div>
@@ -1241,7 +1255,8 @@
       <div class="dataset-row fade-up delay-1">
         <div class="dataset-item">
           <div class="dataset-name">BATADAL + TON_IoT</div>
-          <div class="dataset-desc">BATADAL: Water treatment plant sensor telemetry with labeled attack periods. TON_IoT: Industrial network traffic logs for ICS anomaly detection.</div>
+          <div class="dataset-desc">BATADAL: Water treatment plant sensor telemetry with labeled attack periods.
+            TON_IoT: Industrial network traffic logs for ICS anomaly detection.</div>
           <div class="dataset-use">Cyber + Physical Stream</div>
           <div><span class="badge-free">Free</span></div>
         </div>

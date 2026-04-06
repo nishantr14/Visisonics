@@ -13,7 +13,7 @@ def get_risk_score(cyber, physical, audio=None, visual=None):
         score = 0.40 * cyber + 0.35 * physical + 0.25 * visual
         mode = "Tri-Modal"
     else:
-        score = 0.50 * cyber + 0.50 * physical
+        score = 0.60 * cyber + 0.40 * physical
         mode = "Bi-Modal (Core)"
 
     return round(score * 100, 1), mode

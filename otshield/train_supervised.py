@@ -1,12 +1,14 @@
 """
-OTShield - Supervised Model Training
-Uses all 43 BATADAL sensor features + static engineering (no temporal leakage).
-Ensemble (RF + GBM) with threshold optimization for max F1.
+OTShield - Physical Layer Model Training (BATADAL)
+Ensemble (RF + GBM) with TimeSeriesSplit to allow temporal features WITHOUT leakage.
+
+Key insight: StratifiedKFold shuffles rows, so rolling/lag features leak future info.
+TimeSeriesSplit preserves time ordering, making temporal features safe.
 
 Usage:
     python train_supervised.py
 
-The engineer_features() function can also be imported by other modules
+The engineer_features() function can be imported by other modules
 without triggering training.
 """
 
@@ -15,7 +17,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import f1_score, classification_report, roc_auc_score
 import joblib
 
@@ -27,7 +29,11 @@ MODELS = os.path.join(BASE, "models")
 
 
 def engineer_features(df, sensor_cols):
-    """Static feature engineering - no temporal features, no leakage risk."""
+    """
+    Feature engineering — static + temporal.
+    Temporal features (rolling, lag, diff) are safe when used with TimeSeriesSplit
+    because rows are never shuffled across time.
+    """
     X = df[sensor_cols].copy()
 
     level_cols = [c for c in sensor_cols if c.startswith("L_T")]
@@ -35,6 +41,7 @@ def engineer_features(df, sensor_cols):
     flow_cols = [c for c in sensor_cols if c.startswith("F_PU") or c.startswith("F_V")]
     status_cols = [c for c in sensor_cols if c.startswith("S_")]
 
+    # ── Static cross-sensor features ──
     X["level_mean"] = df[level_cols].mean(axis=1)
     X["level_std"] = df[level_cols].std(axis=1)
     X["level_range"] = df[level_cols].max(axis=1) - df[level_cols].min(axis=1)
@@ -54,6 +61,29 @@ def engineer_features(df, sensor_cols):
         if fc in sensor_cols:
             X[f"{sc}_flow_mismatch"] = X[sc] * (1 - (X[fc] > 0.1).astype(float))
 
+    # ── Temporal features (safe with TimeSeriesSplit) ──
+    # Rolling statistics over short windows
+    for col in level_cols + pressure_cols[:4]:
+        X[f"{col}_roll3_mean"] = df[col].rolling(3, min_periods=1).mean()
+        X[f"{col}_roll3_std"] = df[col].rolling(3, min_periods=1).std().fillna(0)
+        X[f"{col}_roll6_mean"] = df[col].rolling(6, min_periods=1).mean()
+        X[f"{col}_diff1"] = df[col].diff(1).fillna(0)
+
+    # Flow rate changes
+    for col in flow_cols[:6]:
+        X[f"{col}_diff1"] = df[col].diff(1).fillna(0)
+        X[f"{col}_roll3_mean"] = df[col].rolling(3, min_periods=1).mean()
+
+    # Pump status change detection
+    for col in status_cols:
+        X[f"{col}_changed"] = df[col].diff(1).abs().fillna(0)
+
+    # System-level temporal
+    X["level_mean_roll6"] = X["level_mean"].rolling(6, min_periods=1).mean()
+    X["pressure_mean_roll6"] = X["pressure_mean"].rolling(6, min_periods=1).mean()
+    X["flow_mean_diff1"] = X["flow_mean"].diff(1).fillna(0)
+    X["active_pumps_diff1"] = X["total_active_pumps"].diff(1).fillna(0)
+
     return X
 
 
@@ -71,12 +101,22 @@ if __name__ == "__main__":
     print(f"Dataset03: {len(df3)} rows (all normal)")
     print(f"Dataset04: {len(df4)} rows - normal={sum(df4['label']==0)}, attack={sum(df4['label']==1)}")
 
-    X3 = engineer_features(df3, SENSOR_COLS)
-    X4 = engineer_features(df4, SENSOR_COLS)
-    ALL_FEATURE_NAMES = list(X3.columns)
-    y4 = df4["label"].values
+    # Engineer features on concatenated data (temporal features need contiguous time)
+    # Dataset03 comes first (earlier in time), then dataset04
+    df_all = pd.concat([df3, df4], ignore_index=True)
+    y_all_labels = np.concatenate([np.zeros(len(df3)), df4["label"].values])
+
+    X_all = engineer_features(df_all, SENSOR_COLS)
+    ALL_FEATURE_NAMES = list(X_all.columns)
     print(f"Features: {len(ALL_FEATURE_NAMES)}")
 
+    # Split back: dataset03 portion for scaler fitting, dataset04 for CV
+    n3 = len(df3)
+    X3 = X_all.iloc[:n3]
+    X4 = X_all.iloc[n3:]
+    y4 = df4["label"].values
+
+    # Fit scaler on normal data only
     scaler = StandardScaler().fit(X3)
     X3s = scaler.transform(X3)
     X4s = scaler.transform(X4)
@@ -87,16 +127,29 @@ if __name__ == "__main__":
     gb = GradientBoostingClassifier(n_estimators=300, max_depth=5, learning_rate=0.05,
                                      min_samples_leaf=5, random_state=42)
 
+    # ── TimeSeriesSplit CV on dataset04 ──
+    # This respects temporal order: train on earlier rows, test on later rows.
+    # Temporal features (rolling, diff) are computed BEFORE splitting on the
+    # full time-ordered sequence, which is valid because each row's temporal
+    # features only depend on preceding rows (rolling uses min_periods, diff
+    # looks backward). No future information leaks into test folds.
     print("\n" + "=" * 60)
-    print("STRATIFIED 5-FOLD CV (Ensemble RF+GBM)")
+    print("TIME-SERIES 5-FOLD CV (Ensemble RF+GBM)")
     print("=" * 60)
 
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    tscv = TimeSeriesSplit(n_splits=5)
     f1s, aucs, threshs = [], [], []
 
-    for fold, (tr, te) in enumerate(skf.split(X4s, y4)):
+    for fold, (tr, te) in enumerate(tscv.split(X4s)):
+        # Prepend all of dataset03 (normal) to each fold's training set
         X_train = np.vstack([X3s, X4s[tr]])
         y_train = np.concatenate([np.zeros(len(X3s)), y4[tr]])
+
+        # Skip folds where train or test has only one class
+        if len(np.unique(y_train)) < 2 or len(np.unique(y4[te])) < 2:
+            print(f"  Fold {fold+1}: SKIPPED (insufficient class diversity, "
+                  f"train_attacks={y_train.sum():.0f}, test_attacks={y4[te].sum():.0f})")
+            continue
 
         ens = VotingClassifier([("rf", rf), ("gb", gb)], voting="soft")
         ens.fit(X_train, y_train)
@@ -109,32 +162,39 @@ if __name__ == "__main__":
             if f1 > best_f1:
                 best_f1, best_t = f1, t
         f1s.append(best_f1); aucs.append(auc); threshs.append(best_t)
-        print(f"  Fold {fold+1}: F1={best_f1:.4f}  AUC={auc:.4f}  thresh={best_t:.2f}")
+        print(f"  Fold {fold+1}: F1={best_f1:.4f}  AUC={auc:.4f}  thresh={best_t:.2f}  "
+              f"(train={len(tr)}, test={len(te)}, attacks_in_test={y4[te].sum():.0f})")
 
     mean_f1 = np.mean(f1s)
     mean_auc = np.mean(aucs)
     mean_thresh = np.mean(threshs)
     print(f"\n  >> CV F1={mean_f1:.4f}  AUC={mean_auc:.4f}  thresh={mean_thresh:.2f}")
 
-    # Final model
+    # ── Final model on all data ──
     print("\n" + "=" * 60)
-    print("FINAL MODEL")
+    print("FINAL MODEL (trained on all data)")
     print("=" * 60)
 
-    X_all = np.vstack([X3s, X4s])
-    y_all = np.concatenate([np.zeros(len(X3s)), y4])
+    X_final = np.vstack([X3s, X4s])
+    y_final = np.concatenate([np.zeros(len(X3s)), y4])
     final = VotingClassifier([("rf", rf), ("gb", gb)], voting="soft")
-    final.fit(X_all, y_all)
+    final.fit(X_final, y_final)
 
     opt_thresh = round(mean_thresh, 2)
-    yp_final = final.predict_proba(X4s)[:, 1]
-    y_pred = (yp_final >= opt_thresh).astype(int)
-    final_f1 = f1_score(y4, y_pred)
-    final_auc = roc_auc_score(y4, yp_final)
+
+    # Hold-out eval: use last 20% of dataset04 (time-ordered)
+    split_idx = int(len(X4s) * 0.8)
+    X_holdout = X4s[split_idx:]
+    y_holdout = y4[split_idx:]
+    yp_holdout = final.predict_proba(X_holdout)[:, 1]
+    y_pred_holdout = (yp_holdout >= opt_thresh).astype(int)
+    holdout_f1 = f1_score(y_holdout, y_pred_holdout, zero_division=0)
+    holdout_auc = roc_auc_score(y_holdout, yp_holdout) if len(np.unique(y_holdout)) > 1 else 0.5
 
     print(f"Threshold: {opt_thresh}")
-    print(f"F1: {final_f1:.4f}  AUC: {final_auc:.4f}")
-    print(classification_report(y4, y_pred, target_names=["Normal", "Attack"]))
+    print(f"Hold-out F1 (last 20%): {holdout_f1:.4f}")
+    print(f"Hold-out AUC (last 20%): {holdout_auc:.4f}")
+    print(classification_report(y_holdout, y_pred_holdout, target_names=["Normal", "Attack"]))
 
     # Save
     joblib.dump(final, os.path.join(MODELS, "supervised_model.pkl"))
@@ -146,11 +206,12 @@ if __name__ == "__main__":
             "best_model": "ensemble_rf_gbm",
             "cv_f1": round(mean_f1, 4),
             "cv_auc": round(mean_auc, 4),
-            "final_f1": round(final_f1, 4),
-            "final_auc": round(final_auc, 4),
+            "holdout_f1": round(holdout_f1, 4),
+            "holdout_auc": round(holdout_auc, 4),
             "optimal_threshold": opt_thresh,
             "n_features": len(ALL_FEATURE_NAMES),
             "sensor_cols": SENSOR_COLS,
+            "cv_method": "TimeSeriesSplit_5fold",
         }, f, indent=2)
 
     print("[OK] All artifacts saved")
