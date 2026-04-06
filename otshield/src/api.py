@@ -81,9 +81,15 @@ def build_payload(reading: dict) -> dict:
     cyber_explanation = ""
     cyber_top_feature = ""
 
-    # ── PHYSICAL LAYER HOOK ───────────────────────────
-    # Replace this block with: from physical_layer import get_physical_score
+    # ── PHYSICAL LAYER HOOK ───────────────────────────────────────
+    # Uncomment to activate real physical layer:
+    # from physical_layer import get_physical_score
+    # physical_score, physical_explanation, physical_top_feature = get_physical_score(reading)
+    #
+    # Placeholder (remove when above is active):
     physical_score = _placeholder_physical(reading)
+    physical_explanation = ""
+    physical_top_feature = ""
 
     # ── AUDIO LAYER HOOK ──────────────────────────────
     # Replace this block with: from acoustic_layer import get_acoustic_score
@@ -119,7 +125,8 @@ def build_payload(reading: dict) -> dict:
         ),
     )
 
-    top_feature = cyber_label if cyber_score >= physical_score else "Sensor deviation"
+    physical_label = physical_top_feature if physical_top_feature else "Sensor deviation"
+    top_feature = cyber_label if cyber_score >= physical_score else physical_label
     action = get_recommended_action(risk_level, top_feature)
 
     payload = PredictionPayload(

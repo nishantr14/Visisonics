@@ -21,6 +21,9 @@ with open(_path("models/if_score_bounds.json")) as f:
 with open(_path("models/autoencoder_threshold.json")) as f:
     AE_THRESHOLD = json.load(f)["threshold"]
 
+with open(_path("models/optimized_thresholds_cyber.json")) as f:
+    OPT_THRESHOLDS = json.load(f)
+
 model_if    = joblib.load(_path("models/isolation_forest.pkl"))
 model_ocsvm = joblib.load(_path("models/ocsvm_cyber.pkl"))
 scaler      = joblib.load(_path("models/scaler_cyber.pkl"))
@@ -43,17 +46,24 @@ def get_cyber_score(sensor_dict):
 
     if BEST_MODEL == "isolation_forest":
         raw   = model_if.decision_function(X)[0]
-        score = (raw - IF_BOUNDS["min"]) / (IF_BOUNDS["max"] - IF_BOUNDS["min"])
-        score = 1 - score
+        thresh = OPT_THRESHOLDS.get("isolation_forest", 0.0)
+        # Use distance from optimized threshold as score
+        score = 0.5 + (thresh - raw)
+        score = max(0.0, min(1.0, score))
+
     elif BEST_MODEL == "ocsvm":
-        pred  = model_ocsvm.decision_function(X)[0]
-        score = 1 / (1 + np.exp(pred))
-    else:
+        raw   = model_ocsvm.decision_function(X)[0]
+        thresh = OPT_THRESHOLDS.get("ocsvm", 0.0)
+        score = 0.5 + (thresh - raw)
+        score = max(0.0, min(1.0, score))
+
+    else:  # autoencoder
         recon = model_ae.predict(X, verbose=0)
         recon_error = float(np.mean((X - recon) ** 2))
-        score = recon_error / (AE_THRESHOLD * 2)
+        thresh = OPT_THRESHOLDS.get("autoencoder", AE_THRESHOLD)
+        score = recon_error / (thresh * 2)
+        score = max(0.0, min(1.0, score))
 
-    score = max(0.0, min(1.0, score))
     score = round(score * 100, 1)
 
     explainer   = shap.TreeExplainer(model_if)
