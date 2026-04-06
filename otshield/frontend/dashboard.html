@@ -182,14 +182,35 @@
     .scenario-btn.physical-btn { border-color: var(--green); color: var(--green); }
     .scenario-btn.physical-btn:hover { background: rgba(0,204,136,0.1); }
     .scenario-btn.critical-btn {
-      border-color: var(--red); color: #fff;
+      border-color: var(--red-bright); color: #fff;
       background: var(--red);
+      animation: pulse-red 2s infinite;
     }
     .scenario-btn.critical-btn:hover { background: var(--red-bright); }
     .scenario-btn.active { outline: 2px solid #fff; outline-offset: 2px; }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 5px rgba(255,26,26,0.5); }
+      50% { box-shadow: 0 0 25px rgba(255,26,26,0.9); }
+    }
+
+    /* ─── TOAST NOTIFICATION ─── */
+    #toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(255, 26, 26, 0.9); color: #fff;
+      padding: 12px 24px; border-radius: 4px;
+      font-family: var(--mono); font-size: 14px; font-weight: bold;
+      letter-spacing: 2px; text-transform: uppercase;
+      opacity: 0; transition: opacity 0.3s, top 0.3s; z-index: 9999;
+      pointer-events: none; border: 1px solid rgba(255,255,255,0.2);
+    }
+    #toast.show { opacity: 1; top: 80px; }
   </style>
 </head>
 <body>
+
+<!-- TOAST -->
+<div id="toast">SYSTEM NORMALIZED</div>
 
 <!-- NAV -->
 <nav>
@@ -282,7 +303,7 @@
     <button class="scenario-btn active" onclick="simulate('normal', this)">Normal</button>
     <button class="scenario-btn cyber-btn" onclick="simulate('cyber_attack', this)">Cyber Attack</button>
     <button class="scenario-btn physical-btn" onclick="simulate('physical_fault', this)">Physical Fault</button>
-    <button class="scenario-btn critical-btn" onclick="simulate('critical', this)">Critical</button>
+    <button class="scenario-btn critical-btn" onclick="simulate('critical', this)">TRIGGER CHAOS (Critical)</button>
   </div>
 
 </div>
@@ -437,10 +458,23 @@ function connect() {
 connect();
 
 // ─── Scenario Buttons ───
+function showToast(msg, color) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = color || 'rgba(255, 26, 26, 0.9)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 function simulate(mode, btn) {
   fetch(API + '/simulate/' + mode, { method: 'POST' }).catch(() => {});
   document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+
+  if (mode === 'normal') showToast('SYSTEM NORMALIZED — Restoring Baseline', 'rgba(0, 204, 136, 0.95)');
+  else if (mode === 'cyber_attack') showToast('INJECTING PAYLOAD — Network Anomaly', 'rgba(77, 159, 255, 0.95)');
+  else if (mode === 'physical_fault') showToast('OVERRIDING SENSORS — Physical Fault', 'rgba(153, 102, 255, 0.95)');
+  else if (mode === 'critical') showToast('TRIGGERING CHAOS — Multi-Layer Attack', 'rgba(255, 26, 26, 0.95)');
 }
 </script>
 </body>
