@@ -13,9 +13,9 @@ import os
 from fusion import get_risk_score, classify_risk, get_recommended_action
 from api_models import PredictionPayload, StatusResponse, ShapExplanation, ShapFeature
 
-# Independent scorers — separate models, separate feature spaces
-from supervised_scorer import get_supervised_score, reset_history
-from cyber_scorer import get_cyber_score
+# Independent scorers — unified deep learning architecture
+from physical_layer import get_physical_score
+from cyber_layer import get_cyber_score
 
 # -- DATA SOURCE SWITCH -----------------------------------------------------
 USE_REAL_PLC = False
@@ -68,27 +68,26 @@ current_mode: str = "normal"
 def build_payload() -> dict:
     """Score both layers independently and fuse results."""
 
-    # ── PHYSICAL LAYER (BATADAL supervised model) ──
+    # ── PHYSICAL LAYER (BATADAL Isolation Forest) ──
     physical_reading = get_physical_reading()
-    physical_score, physical_expl, physical_top = get_supervised_score(physical_reading)
+    physical_score_01, physical_expl, physical_top = get_physical_score(physical_reading)
+    physical_score = physical_score_01 * 100.0
 
-    # ── CYBER LAYER (TON_IoT RF model) ──
+    # ── CYBER LAYER (TON/UNSW Deep Learning) ──
     if get_cyber_reading is not None:
         network_flow = get_cyber_reading()
-        cyber_score, cyber_expl, cyber_top = get_cyber_score(network_flow)
+        cyber_score_01, cyber_expl, cyber_top = get_cyber_score(network_flow)
+        cyber_score = cyber_score_01 * 100.0
     else:
-        cyber_score, cyber_expl, cyber_top = 0.0, "No network feed", "N/A"
+        cyber_score, cyber_score_01, cyber_expl, cyber_top = 0.0, 0.0, "No network feed", "N/A"
 
     # Audio/Visual layers (not yet implemented)
     audio_score = None
     visual_score = None
 
     # ── FUSION (expects 0-1 scale) ──
-    cyber_01 = cyber_score / 100.0
-    physical_01 = physical_score / 100.0
-
-    fusion_score, mode_active = get_risk_score(cyber_01, physical_01, audio_score, visual_score)
-    risk_level = classify_risk(cyber_01, physical_01, audio_score, visual_score)
+    fusion_score, mode_active = get_risk_score(cyber_score_01, physical_score_01, audio_score, visual_score)
+    risk_level = classify_risk(cyber_score_01, physical_score_01, audio_score, visual_score)
 
     # ── SHAP-style explanation ──
     total = cyber_score + physical_score + 0.01  # avoid div-by-zero

@@ -1,0 +1,65 @@
+{
+  "dataset": "TON_IoT",
+  "data_path": "otshield\\data\\train_test_network.csv",
+  "label_column": "label",
+  "dropped_columns": [
+    "conn_state",
+    "dns_AA",
+    "dns_RA",
+    "dns_RD",
+    "dns_query",
+    "dns_rejected",
+    "dst_ip",
+    "dst_ip_bytes",
+    "http_method",
+    "http_orig_mime_types",
+    "http_resp_mime_types",
+    "http_trans_depth",
+    "http_uri",
+    "http_user_agent",
+    "http_version",
+    "proto",
+    "service",
+    "src_ip",
+    "src_ip_bytes",
+    "ssl_cipher",
+    "ssl_established",
+    "ssl_issuer",
+    "ssl_resumed",
+    "ssl_subject",
+    "ssl_version",
+    "type",
+    "weird_addl",
+    "weird_name",
+    "weird_notice"
+  ],
+  "split": {
+    "train_size": 135067,
+    "val_size": 33767,
+    "test_size": 42209,
+    "random_state": 42,
+    "stratified": true,
+    "test_used_only_once": true
+  },
+  "tuning": {
+    "method": "validation_grid_search",
+    "best_params": {
+      "class_weight": null,
+      "max_depth": 12,
+      "min_samples_leaf": 4,
+      "n_estimators": 200
+    },
+    "best_validation_f1": 0.8656375455629651
+  },
+  "calibration": {
+    "method": "isotonic_validation_only",
+    "val_brier_raw": 0.1808177008833419,
+    "val_brier_calibrated": 0.18066857013822388
+  },
+  "metrics": {
+    "f1": 0.8655629317063993,
+    "precision": 0.7630612486672195,
+    "recall": 0.9998758111086963,
+    "brier_score": 0.18053273350108026
+  }
+}
