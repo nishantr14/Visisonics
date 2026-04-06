@@ -73,7 +73,7 @@
 
     /* ─── SCORE CARDS ─── */
     .score-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
     }
     .score-card {
       background: var(--dark-2); border: 1px solid rgba(255,255,255,0.08);
@@ -84,8 +84,9 @@
       height: 2px;
     }
     .score-card.cyber::before { background: var(--blue-bright); }
-    .score-card.audio::before { background: var(--green); }
-    .score-card.visual::before { background: var(--purple); }
+    .score-card.physical::before { background: var(--green); }
+    .score-card.audio::before { background: var(--purple); }
+    .score-card.visual::before { background: var(--yellow); }
     .score-card.fusion::before { background: var(--steel); }
 
     .score-label {
@@ -198,8 +199,8 @@
     <span id="statusText">CONNECTED</span>
   </div>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="#">Dashboard</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
   </ul>
 </nav>
 
@@ -212,6 +213,11 @@
       <div class="score-label">Cyber</div>
       <div class="score-value" id="cyberScore">N/A</div>
       <div class="score-sub">Network layer</div>
+    </div>
+    <div class="score-card physical">
+      <div class="score-label">Physical</div>
+      <div class="score-value" id="physicalScore">N/A</div>
+      <div class="score-sub">Sensor telemetry</div>
     </div>
     <div class="score-card audio">
       <div class="score-label">Audio</div>
@@ -245,6 +251,12 @@
         <div class="shap-pct" id="shapCyberPct">0%</div>
       </div>
       <div class="shap-detail" id="shapCyberLabel">—</div>
+      <div class="shap-row">
+        <div class="shap-label">PHYSICAL</div>
+        <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapPhysicalBar" style="width:0%;background:var(--green)"></div></div>
+        <div class="shap-pct" id="shapPhysicalPct">0%</div>
+      </div>
+      <div class="shap-detail" id="shapPhysicalLabel">—</div>
       <div class="shap-row">
         <div class="shap-label">AUDIO</div>
         <div class="shap-bar-bg"><div class="shap-bar-fill" id="shapAudioBar" style="width:0%;background:var(--green)"></div></div>
@@ -341,6 +353,7 @@ const alertClass = {
 function update(d) {
   // Score cards
   document.getElementById('cyberScore').textContent = scoreText(d.cyber_score);
+  document.getElementById('physicalScore').textContent = scoreText(d.physical_score);
   document.getElementById('audioScore').textContent = scoreText(d.audio_score);
   document.getElementById('visualScore').textContent = scoreText(d.visual_score);
   document.getElementById('fusionScore').textContent = scoreText(d.fusion_score);
@@ -360,6 +373,9 @@ function update(d) {
   document.getElementById('shapCyberBar').style.width = s.cyber.pct + '%';
   document.getElementById('shapCyberPct').textContent = s.cyber.pct + '%';
   document.getElementById('shapCyberLabel').textContent = s.cyber.label;
+  document.getElementById('shapPhysicalBar').style.width = s.physical.pct + '%';
+  document.getElementById('shapPhysicalPct').textContent = s.physical.pct + '%';
+  document.getElementById('shapPhysicalLabel').textContent = s.physical.label;
   document.getElementById('shapAudioBar').style.width = s.audio.pct + '%';
   document.getElementById('shapAudioPct').textContent = s.audio.pct + '%';
   document.getElementById('shapAudioLabel').textContent = s.audio.label;

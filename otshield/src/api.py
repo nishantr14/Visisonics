@@ -85,6 +85,10 @@ def build_payload(reading: dict) -> dict:
             label=cyber_label,
             pct=round(cyber_score / total * 100, 1),
         ),
+        physical=ShapFeature(
+            label=physical_label,
+            pct=round(physical_score / total * 100, 1),
+        ),
         audio=ShapFeature(
             label="Acoustic baseline normal",
             pct=0.0,

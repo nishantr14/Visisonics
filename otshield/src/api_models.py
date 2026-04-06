@@ -11,6 +11,7 @@ class ShapFeature(BaseModel):
 
 class ShapExplanation(BaseModel):
     cyber: ShapFeature
+    physical: ShapFeature
     audio: ShapFeature
     visual: ShapFeature
 

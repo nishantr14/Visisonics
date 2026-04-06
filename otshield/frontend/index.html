@@ -938,14 +938,15 @@
       <li><a href="#pipeline">Architecture</a></li>
       <li><a href="#fusion">Fusion</a></li>
       <li><a href="#team">Team</a></li>
+      <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
     </ul>
-    <div class="nav-badge">VISISONICS AI'26</div>
+    <div class="nav-badge">VISIONICS AI'26</div>
   </nav>
 
   <!-- HERO -->
   <div class="hero">
     <video class="hero-video" autoplay muted loop playsinline>
-      <source src="hero.mp4" type="video/mp4">
+      <source src="/static/hero.mp4" type="video/mp4">
     </video>
     <div class="hero-overlay"></div>
     <div class="hero-content">
@@ -955,8 +956,8 @@
       <p class="hero-desc">The only industrial security system that watches the network, listens to the machines, and
         sees with cameras — simultaneously. Coordinated attacks can't hide when all three streams are watching.</p>
       <div class="hero-cta-row">
-        <a href="#pipeline" class="btn-primary">See Architecture</a>
-        <a href="#fusion" class="btn-ghost">How It Works</a>
+        <a href="/dashboard" class="btn-primary">Launch Dashboard</a>
+        <a href="#pipeline" class="btn-ghost">See Architecture</a>
       </div>
     </div>
     <div class="hero-scroll">
@@ -1153,15 +1154,46 @@
     </div>
   </div>
 
+  <!-- BENCHMARK RESULTS -->
+  <section id="benchmark" style="padding:80px 48px;max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Performance</div>
+    <h2 class="section-title fade-up">Benchmark results<br>on BATADAL dataset.</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--red-bright)">0.795</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">CV F1 SCORE</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">5-fold cross-validated</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-1">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--blue-bright)">0.967</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ROC-AUC</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">vs 0.891 baseline</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-2">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#00CC88">219</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ATTACKS DETECTED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">out of 219 total</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center" class="fade-up delay-3">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#FFB800">71</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">FEATURES ENGINEERED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">from 43 raw sensors</div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:var(--steel);margin-top:24px;text-align:center;font-family:var(--mono);letter-spacing:1px">
+      Evaluated on BATADAL dataset04 (4,177 samples) &mdash; Baseline: Zahoor et al. 2025 (F1=0.835, AUC=0.891)
+    </p>
+  </section>
+
   <!-- TECH STACK -->
   <section id="tech">
     <div class="section-label fade-up">Tech Stack</div>
     <h2 class="section-title fade-up">Built on proven<br>industrial-grade tools.</h2>
     <div class="tech-grid">
       <div class="tech-item fade-up">
-        <div class="tech-role">Cyber model</div>
-        <div class="tech-name">Isolation Forest + Autoencoder</div>
-        <div class="tech-desc">Unsupervised anomaly detection on BATADAL sensor telemetry and TON_IoT network traffic logs.</div>
+        <div class="tech-role">Detection Model</div>
+        <div class="tech-name">Ensemble RF + GBM</div>
+        <div class="tech-desc">Supervised ensemble on 43 BATADAL sensors + 71 engineered features. CV F1 = 0.795, AUC = 0.967.</div>
       </div>
       <div class="tech-item fade-up delay-1">
         <div class="tech-role">Audio model</div>
@@ -1185,8 +1217,8 @@
       </div>
       <div class="tech-item fade-up delay-1">
         <div class="tech-role">Frontend</div>
-        <div class="tech-name">React</div>
-        <div class="tech-desc">Live threat map, risk gauge, alert log with SHAP explanations.</div>
+        <div class="tech-name">Vanilla JS + Chart.js</div>
+        <div class="tech-desc">Live threat dashboard with real-time WebSocket streaming, risk gauge, and alert log.</div>
       </div>
       <div class="tech-item fade-up delay-2">
         <div class="tech-role">Cyber dataset</div>
