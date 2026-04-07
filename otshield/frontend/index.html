@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OT Shield — Industrial Cyber-Physical Security</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --red: #CC0000;
+      --red-bright: #FF1A1A;
+      --blue: #0066FF;
+      --blue-bright: #4D9FFF;
+      --steel: #8A9BB0;
+      --dark: #040608;
+      --dark-2: #080D12;
+      --dark-3: #0D1520;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Barlow', sans-serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--dark);
+      color: #fff;
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      background: linear-gradient(to bottom, rgba(4, 6, 8, 0.95), transparent);
+    }
+
+    .nav-logo {
+      font-family: var(--cond);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .nav-logo span {
+      color: var(--red-bright);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--steel);
+      text-decoration: none;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .nav-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--red-bright);
+      border: 1px solid var(--red);
+      padding: 6px 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.7;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(4, 6, 8, 0.5) 0%, transparent 30%, transparent 60%, rgba(4, 6, 8, 0.95) 100%),
+        linear-gradient(to right, rgba(4, 6, 8, 0.6) 0%, transparent 50%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      padding: 0 48px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red-bright);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: var(--red-bright);
+    }
+
+    .hero-title {
+      font-family: var(--cond);
+      font-size: clamp(64px, 10vw, 120px);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-title .highlight {
+      color: var(--red-bright);
+    }
+
+    .hero-subtitle {
+      font-family: var(--cond);
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700;
+      color: var(--steel);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 32px;
+    }
+
+    .hero-desc {
+      font-size: 17px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 48px;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .btn-primary {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--red);
+      border: none;
+      padding: 16px 36px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--red-bright);
+    }
+
+    .btn-ghost {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--steel);
+      border: 1px solid rgba(138, 155, 176, 0.3);
+      padding: 16px 36px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .hero-scroll span {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--steel), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* ─── TICKER ─── */
+    .ticker {
+      background: var(--red);
+      padding: 12px 0;
+      overflow: hidden;
+    }
+
+    .ticker-inner {
+      display: flex;
+      gap: 80px;
+      animation: ticker 30s linear infinite;
+      white-space: nowrap;
+    }
+
+    .ticker-item {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ticker-item::before {
+      content: '//';
+      opacity: 0.5;
+    }
+
+    @keyframes ticker {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      padding: 120px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--red-bright);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--red-bright);
+    }
+
+    .section-title {
+      font-family: var(--cond);
+      font-size: clamp(40px, 5vw, 72px);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 0.95;
+      letter-spacing: -1px;
+      margin-bottom: 24px;
+    }
+
+    .section-body {
+      font-size: 16px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.8;
+      max-width: 640px;
+    }
+
+    /* ─── PROBLEM ─── */
+    .problem-section {
+      background: var(--dark-2);
+      max-width: 100%;
+      padding: 120px 0;
+    }
+
+    .problem-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .ukraine-card {
+      background: rgba(204, 0, 0, 0.08);
+      border: 1px solid rgba(204, 0, 0, 0.3);
+      border-left: 3px solid var(--red-bright);
+      padding: 40px;
+    }
+
+    .ukraine-card .date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red-bright);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+    }
+
+    .ukraine-card h3 {
+      font-family: var(--cond);
+      font-size: 28px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .ukraine-card p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.8;
+    }
+
+    .stat-row {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .stat-item {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .stat-num {
+      font-family: var(--cond);
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--red-bright);
+      line-height: 1;
+      min-width: 120px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.7;
+      padding-top: 8px;
+    }
+
+    .stat-label strong {
+      display: block;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    /* ─── PIPELINE ─── */
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 64px;
+    }
+
+    .pipe-card {
+      background: var(--dark-2);
+      border-top: 2px solid transparent;
+      padding: 40px 32px;
+      transition: transform 0.3s;
+    }
+
+    .pipe-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .pipe-card.cyber {
+      border-color: var(--blue-bright);
+    }
+
+    .pipe-card.audio {
+      border-color: #00CC88;
+    }
+
+    .pipe-card.visual {
+      border-color: #9966FF;
+    }
+
+    .pipe-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+    }
+
+    .pipe-card.cyber .pipe-num {
+      color: var(--blue-bright);
+    }
+
+    .pipe-card.audio .pipe-num {
+      color: #00CC88;
+    }
+
+    .pipe-card.visual .pipe-num {
+      color: #9966FF;
+    }
+
+    .pipe-title {
+      font-family: var(--cond);
+      font-size: 28px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+
+    .pipe-subtitle {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .pipe-desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .pipe-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      padding: 4px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--steel);
+      margin: 3px 3px 0 0;
+    }
+
+    /* ─── FUSION ─── */
+    .fusion-section {
+      background: var(--dark-2);
+      max-width: 100%;
+      padding: 120px 0;
+    }
+
+    .fusion-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+
+    .threat-matrix {
+      margin-top: 64px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .matrix-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 180px 120px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .matrix-header div,
+    .matrix-row div {
+      padding: 14px 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--steel);
+      text-transform: uppercase;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 180px 120px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.2s;
+    }
+
+    .matrix-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .matrix-row div {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+    }
+
+    .level-none {
+      color: #3A4A5A !important;
+    }
+
+    .level-yellow {
+      color: #FFB800 !important;
+    }
+
+    .level-orange {
+      color: #FF6600 !important;
+    }
+
+    .level-red {
+      color: var(--red-bright) !important;
+      font-weight: 700;
+    }
+
+    .shap-card {
+      margin-top: 64px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(204, 0, 0, 0.3);
+      padding: 40px;
+      font-family: var(--mono);
+    }
+
+    .shap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .shap-alert {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--red-bright);
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 26, 26, 0.4);
+      }
+
+      50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 8px rgba(255, 26, 26, 0);
+      }
+    }
+
+    .alert-label {
+      font-size: 13px;
+      color: var(--red-bright);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .alert-score {
+      font-size: 24px;
+      color: var(--red-bright);
+    }
+
+    .shap-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .shap-label {
+      font-size: 11px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      min-width: 300px;
+    }
+
+    .shap-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .shap-bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    .shap-pct {
+      font-size: 12px;
+      color: #fff;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .shap-action {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .shap-action strong {
+      color: #fff;
+    }
+
+    /* ─── TECH ─── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 64px;
+    }
+
+    .tech-item {
+      background: var(--dark-2);
+      padding: 32px 28px;
+      transition: background 0.2s;
+    }
+
+    .tech-item:hover {
+      background: var(--dark-3);
+    }
+
+    .tech-role {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .tech-name {
+      font-family: var(--cond);
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tech-desc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.6;
+    }
+
+    /* ─── TEAM ─── */
+    .team-section {
+      background: var(--dark-2);
+      max-width: 100%;
+      padding: 120px 0;
+    }
+
+    .team-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 64px;
+    }
+
+    .team-card {
+      background: var(--dark);
+      padding: 48px 40px;
+      position: relative;
+      border-top: 2px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--red-bright);
+    }
+
+    .team-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red-bright);
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+    }
+
+    .team-name {
+      font-family: var(--cond);
+      font-size: 36px;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .team-role {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--blue-bright);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .team-owns {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.7;
+    }
+
+    .team-owns li {
+      list-style: none;
+      padding: 4px 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .team-owns li::before {
+      content: '→';
+      color: var(--steel);
+      flex-shrink: 0;
+    }
+
+    /* ─── DATASETS ─── */
+    .dataset-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 64px;
+    }
+
+    .dataset-item {
+      display: grid;
+      grid-template-columns: 200px 1fr 180px 120px;
+      align-items: center;
+      background: var(--dark-2);
+      padding: 28px 32px;
+      gap: 24px;
+      transition: background 0.2s;
+    }
+
+    .dataset-item:hover {
+      background: var(--dark-3);
+    }
+
+    .dataset-name {
+      font-family: var(--cond);
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .dataset-desc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.6;
+    }
+
+    .dataset-use {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .badge-free {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: #00CC88;
+      border: 1px solid #00CC88;
+      padding: 4px 10px;
+      letter-spacing: 2px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: var(--cond);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .footer-logo span {
+      color: var(--red-bright);
+    }
+
+    .footer-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--steel);
+      letter-spacing: 2px;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-up.delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .fade-up.delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .fade-up.delay-3 {
+      transition-delay: 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-logo">OT<span>Shield</span></div>
+    <ul class="nav-links">
+      <li><a href="#problem">Threat</a></li>
+      <li><a href="#pipeline">Architecture</a></li>
+      <li><a href="#fusion">Fusion</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="/dashboard" style="color:var(--red-bright)">Dashboard</a></li>
+    </ul>
+    <div class="nav-badge">VISISONICS AI'26</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="/static/hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">AI-Assisted OT Security Monitoring</div>
+      <h1 class="hero-title">OT<br><span class="highlight">Shield</span></h1>
+      <div class="hero-subtitle">Cyber-Physical Threat Detection</div>
+      <p class="hero-desc">The only industrial security system that watches the network, listens to the machines, and
+        sees with cameras — simultaneously. Coordinated attacks can't hide when all three streams are watching.</p>
+      <div class="hero-cta-row">
+        <a href="/dashboard" class="btn-primary">Launch Dashboard</a>
+        <a href="#pipeline" class="btn-ghost">See Architecture</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <div class="ticker-item">Stream A — SCADA network monitoring</div>
+      <div class="ticker-item">Stream B — Physical sensor telemetry</div>
+      <div class="ticker-item">Hardware-in-the-loop — OpenPLC Modbus</div>
+      <div class="ticker-item">Fusion engine — Real-time correlation</div>
+      <div class="ticker-item">SHAP explainability — Operator clarity</div>
+      <div class="ticker-item">BATADAL + UNSW-NB15 — Labeled threat vectors</div>
+      <div class="ticker-item">Stream A — SCADA network monitoring</div>
+      <div class="ticker-item">Stream B — Physical sensor telemetry</div>
+      <div class="ticker-item">Hardware-in-the-loop — OpenPLC Modbus</div>
+      <div class="ticker-item">Fusion engine — Real-time correlation</div>
+      <div class="ticker-item">SHAP explainability — Operator clarity</div>
+      <div class="ticker-item">BATADAL + UNSW-NB15 — Labeled threat vectors</div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <div class="problem-section" id="problem">
+    <div class="problem-inner">
+      <div class="fade-up">
+        <div class="section-label">The Gap</div>
+        <h2 class="section-title">The attack<br>nobody saw<br>coming</h2>
+        <p class="section-body" style="margin-top:24px">Every existing OT security tool watches either the network or
+          the machines. Never both. Sophisticated attackers exploit this blindspot by hitting both simultaneously — each
+          layer looks normal in isolation. OT Shield closes the gap.</p>
+      </div>
+      <div class="fade-up delay-2">
+        <div class="ukraine-card" style="margin-bottom:24px">
+          <div class="date">December 2015 — Ukraine Power Grid</div>
+          <h3>230,000 people lost power in the middle of winter</h3>
+          <p>Attackers compromised the SCADA network while simultaneously manipulating physical sensors. Network logs
+            looked clean. Machine readings looked normal. Every existing security tool missed it.</p>
+        </div>
+        <div class="stat-row">
+          <div class="stat-item">
+            <div class="stat-num">33%</div>
+            <div class="stat-label"><strong>Of ICS systems compromised</strong>In 2021 alone — and the number keeps
+              growing year on year</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">0</div>
+            <div class="stat-label"><strong>Existing products</strong>That fuse network + acoustic + visual into a
+              single correlated risk score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <section id="pipeline">
+    <div class="section-label fade-up">Architecture</div>
+    <h2 class="section-title fade-up">Dual streams.<br>One truth.</h2>
+    <p class="section-body fade-up delay-1">While competitors monitor a single signal, OT Shield runs three parallel AI
+      pipelines that converge into a single fused risk score — making coordinated attacks mathematically impossible to
+      hide.</p>
+
+    <div class="pipeline">
+      <div class="pipe-card cyber fade-up">
+        <div class="pipe-num">Stream A // Cyber</div>
+        <div class="pipe-title">Network<br>Intelligence</div>
+        <div class="pipe-subtitle">SCADA traffic analysis</div>
+        <p class="pipe-desc">Captures all ICS network packets in real time. Deep Learning Models (Isolation Forests) learn what legitimate Modbus and TCP traffic looks like and flag deviations — command injection, replay attacks, and unauthorized probes.</p>
+        <span class="pipe-tag">Isolation Forest</span>
+        <span class="pipe-tag">UNSW-NB15 / TON_IoT</span>
+        <span class="pipe-tag">Modbus TCP</span>
+      </div>
+      <div class="pipe-card audio fade-up delay-1" style="border-color: #00CC88;">
+        <div class="pipe-num" style="color:#00CC88;">Stream B // Physical</div>
+        <div class="pipe-title">Physical<br>Intelligence</div>
+        <div class="pipe-subtitle">Sensor telemetry monitoring</div>
+        <p class="pipe-desc">Monitors the actual physical constraints of the water treatment plant. Analyzes real-time fluid dynamics (tank levels, pressure, flow rate) using Machine Learning to catch when a physical system is behaving impossibly or dangerously.</p>
+        <span class="pipe-tag">Isolation Forest</span>
+        <span class="pipe-tag">BATADAL Dataset</span>
+        <span class="pipe-tag">PLC Telemetry</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUSION -->
+  <div class="fusion-section" id="fusion">
+    <div class="fusion-inner">
+      <div class="section-label fade-up">Fusion Engine</div>
+      <h2 class="section-title fade-up">When both streams<br>agree — that's the<br><span
+          style="color:var(--red-bright)">dangerous one.</span></h2>
+      <p class="section-body fade-up delay-1" style="margin-top:24px">Each stream produces a score every second. The
+        fusion engine correlates both streams. A sophisticated attack that looks borderline on each stream individually
+        becomes unmistakably critical when both streams elevate simultaneously.</p>
+
+      <div class="threat-matrix fade-up delay-1">
+        <div class="matrix-header">
+          <div>Cyber stream</div>
+          <div>Physical stream</div>
+          <div>Classification</div>
+          <div>Alert level</div>
+        </div>
+        <div class="matrix-row">
+          <div class="level-none">Low</div>
+          <div class="level-none">Low</div>
+          <div>Normal operations</div>
+          <div class="level-none">None</div>
+        </div>
+        <div class="matrix-row">
+          <div class="level-yellow">High</div>
+          <div class="level-none">Low</div>
+          <div>Network probe — early stage</div>
+          <div class="level-yellow">Orange</div>
+        </div>
+        <div class="matrix-row">
+          <div class="level-none">Low</div>
+          <div class="level-yellow">High</div>
+          <div>Sensor degradation / Drift</div>
+          <div class="level-yellow">Yellow</div>
+        </div>
+        <div class="matrix-row">
+          <div class="level-orange">High</div>
+          <div class="level-orange">High</div>
+          <div>Coordinated cyber-physical attack</div>
+          <div class="level-red">Red</div>
+        </div>
+        <div class="matrix-row">
+          <div class="level-red">High</div>
+          <div class="level-red">High</div>
+          <div>Full attack — Ukraine pattern</div>
+          <div class="level-red">Critical</div>
+        </div>
+      </div>
+
+      <div class="shap-card fade-up delay-2">
+        <div class="shap-header">
+          <div class="shap-alert">
+            <div class="alert-dot"></div>
+            <div class="alert-label">Critical alert — 14:32:07</div>
+          </div>
+          <div class="alert-score">Risk score: 94 / 100</div>
+        </div>
+        <div class="shap-row">
+          <div class="shap-label">→ Network: unauthorized PLC-4 command sequence</div>
+          <div class="shap-bar-bg">
+            <div class="shap-bar-fill" style="width:47%;background:var(--blue-bright)"></div>
+          </div>
+          <div class="shap-pct">47%</div>
+        </div>
+        <div class="shap-row" style="margin-bottom:0">
+          <div class="shap-label">→ Physical: Tank-1 outflow pressure — 73% above normal</div>
+          <div class="shap-bar-bg">
+            <div class="shap-bar-fill" style="width:53%;background:#00CC88"></div>
+          </div>
+          <div class="shap-pct">53%</div>
+        </div>
+        <div class="shap-action">
+          <strong>Classification: Coordinated cyber-physical attack</strong><br>
+          Recommended action: Isolate PLC-4 from network segment B — Dispatch inspection to Pump-2 immediately
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENCHMARK RESULTS -->
+  <section id="benchmark" style="padding:80px 48px;max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Performance</div>
+    <h2 class="section-title fade-up">Benchmark results<br>on BATADAL dataset.</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px">
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--red-bright)">0.795</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">CV F1
+          SCORE</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">5-fold cross-validated</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-1">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:var(--blue-bright)">0.967</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ROC-AUC
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">vs 0.891 baseline</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-2">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#00CC88">219</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">ATTACKS
+          DETECTED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">out of 219 total</div>
+      </div>
+      <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);padding:32px 24px;text-align:center"
+        class="fade-up delay-3">
+        <div style="font-family:var(--cond);font-size:56px;font-weight:900;color:#FFB800">71</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:2px;margin-top:8px">
+          FEATURES ENGINEERED</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">from 43 raw sensors</div>
+      </div>
+    </div>
+    <p
+      style="font-size:14px;color:var(--steel);margin-top:24px;text-align:center;font-family:var(--mono);letter-spacing:1px">
+      Evaluated on BATADAL dataset04 (4,177 samples) &mdash; Baseline: Zahoor et al. 2025 (F1=0.835, AUC=0.891)
+    </p>
+  </section>
+
+  <!-- TECH STACK -->
+  <section id="tech">
+    <div class="section-label fade-up">Tech Stack</div>
+    <h2 class="section-title fade-up">Built on proven<br>industrial-grade tools.</h2>
+    <div class="tech-grid">
+      <div class="tech-item fade-up">
+        <div class="tech-role">Physical Model</div>
+        <div class="tech-name">Isolation Forest</div>
+        <div class="tech-desc">Unsupervised anomaly detection on BATADAL engineered features.</div>
+      </div>
+      <div class="tech-item fade-up delay-1">
+        <div class="tech-role">Cyber Model</div>
+        <div class="tech-name">Isolation Forest</div>
+        <div class="tech-desc">Real-time network packet and payload inspection for malicious behavior. F1 = 0.99.</div>
+      </div>
+      <div class="tech-item fade-up delay-2">
+        <div class="tech-role">Explainability</div>
+        <div class="tech-name">SHAP</div>
+        <div class="tech-desc">Every alert explained. Which layer flagged it (Network vs Sensors), and exactly how.</div>
+      </div>
+      <div class="tech-item fade-up">
+        <div class="tech-role">Backend + Simulator</div>
+        <div class="tech-name">FastAPI + PyModbus</div>
+        <div class="tech-desc">Hardware-In-The-Loop emulation. We actively spoof Modbus TCP packets to an OpenPLC backend.</div>
+      </div>
+      <div class="tech-item fade-up delay-1">
+        <div class="tech-role">Frontend</div>
+        <div class="tech-name">Vanilla JS + Chart.js</div>
+        <div class="tech-desc">Live threat dashboard with real-time WebSocket streaming, pulsing alerts, and logs.</div>
+      </div>
+      <div class="tech-item fade-up delay-2">
+        <div class="tech-role">Datasets</div>
+        <div class="tech-name">UNSW-NB15 + BATADAL</div>
+        <div class="tech-desc">Australian cyber network flows + SCADA water treatment plant telemetry.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATASETS -->
+  <div class="fusion-section">
+    <div class="fusion-inner">
+      <div class="section-label fade-up">Data Foundation</div>
+      <h2 class="section-title fade-up">Real data.<br>Real attacks.<br>Real machines.</h2>
+      <div class="dataset-row fade-up delay-1">
+        <div class="dataset-item">
+          <div class="dataset-name">BATADAL</div>
+          <div class="dataset-desc">Water treatment plant sensor telemetry with labeled system attack periods, valve manipulations, and pressure anomalies.</div>
+          <div class="dataset-use">Physical Stream</div>
+          <div><span class="badge-free">iTrust</span></div>
+        </div>
+        <div class="dataset-item">
+          <div class="dataset-name">UNSW-NB15</div>
+          <div class="dataset-desc">Comprehensive cyber dataset featuring hybrid real modern normal activities and synthetic contemporary attack behaviours.</div>
+          <div class="dataset-use">Cyber Stream</div>
+          <div><span class="badge-free">Cyber Range</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="team-section" id="team">
+    <div class="team-inner">
+      <div class="section-label fade-up">The Team</div>
+      <h2 class="section-title fade-up">Built by three.<br>Deployed for millions.</h2>
+      <div class="team-grid">
+        <div class="team-card fade-up">
+          <div class="team-num">01 // Team Lead</div>
+          <div class="team-name">ML Lead</div>
+          <div class="team-role">ML Architecture</div>
+          <ul class="team-owns">
+            <li>Isolation Forest Bi-Modal Architecture</li>
+            <li>Autoencoder audio pipeline</li>
+            <li>SHAP explainability layer</li>
+            <li>Fusion risk scoring engine</li>
+          </ul>
+        </div>
+        <div class="team-card fade-up delay-1">
+          <div class="team-num">02 // Data Engineer</div>
+          <div class="team-name">Data Lead</div>
+          <div class="team-role">Pipeline & Backend</div>
+          <ul class="team-owns">
+            <li>BATADAL + UNSW-NB15 data pipeline</li>
+            <li>Real-time preprocessing</li>
+            <li>FastAPI WebSocket server</li>
+            <li>Demo scenario orchestration</li>
+          </ul>
+        </div>
+        <div class="team-card fade-up delay-2">
+          <div class="team-num">03 // Frontend</div>
+          <div class="team-name">UI Lead</div>
+          <div class="team-role">Dashboard & UI</div>
+          <ul class="team-owns">
+            <li>Live threat map interface</li>
+            <li>Risk score gauge component</li>
+            <li>Alert log with SHAP display</li>
+            <li>Four-scenario demo controls</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">OT<span>Shield</span></div>
+    <div class="footer-meta">
+      VISISONICS AI'26 — Hitachi CV Hackathon<br>
+      AI-Assisted OT Security Monitoring<br>
+      Round 2 — 25 of 350 qualified
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+
+</html>
