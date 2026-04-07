@@ -1,0 +1,40 @@
+# Cell 2 — Load BATADAL datasets (FIXED)
+
+import os
+import pandas as pd
+
+# 🔥 Absolute path based on your new project location
+BASE_DIR = r"C:\Users\sdipe\Downloads\otshield"
+
+DATA_DIR = os.path.join(BASE_DIR, "data")
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+print(f"Data dir:  {DATA_DIR}")
+print(f"Model dir: {MODEL_DIR}")
+
+# 🔍 Debug check (IMPORTANT)
+print("\nFiles in data dir:", os.listdir(DATA_DIR))
+
+# Dataset03 = training (normal), Dataset04 = testing (mixed)
+df_train_raw = pd.read_csv(os.path.join(DATA_DIR, "BATADAL_dataset03.csv"))
+df_test_raw  = pd.read_csv(os.path.join(DATA_DIR, "BATADAL_dataset04.csv"))
+
+# Strip whitespace from column names
+df_train_raw.columns = [c.strip() for c in df_train_raw.columns]
+df_test_raw.columns  = [c.strip() for c in df_test_raw.columns]
+
+print(f"\nTrain shape: {df_train_raw.shape}")
+print(f"Test shape:  {df_test_raw.shape}")
+
+# Handle ATT_FLAG safely
+if "ATT_FLAG" in df_train_raw.columns:
+    print(f"\nTrain ATT_FLAG distribution:\n{df_train_raw['ATT_FLAG'].value_counts()}")
+else:
+    print("\nATT_FLAG not found in train dataset")
+
+if "ATT_FLAG" in df_test_raw.columns:
+    print(f"\nTest ATT_FLAG distribution:\n{df_test_raw['ATT_FLAG'].value_counts()}")
+else:
+    print("\nATT_FLAG not found in test dataset")
